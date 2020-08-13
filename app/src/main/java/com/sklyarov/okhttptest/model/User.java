@@ -1,4 +1,4 @@
-package com.sklyarov.okhttptest;
+package com.sklyarov.okhttptest.model;
 
 import com.google.gson.annotations.SerializedName;
 

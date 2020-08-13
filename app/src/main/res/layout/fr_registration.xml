@@ -16,7 +16,9 @@
             android:layout_marginRight="16dp"
             android:hint="@string/email"
             android:inputType="textEmailAddress"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:text="one8@mail.com"
+            />
 
         <EditText
             android:id="@+id/etName"
@@ -26,7 +28,9 @@
             android:layout_marginRight="16dp"
             android:hint="@string/name"
             android:inputType="text"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:text="one8"
+            />
 
         <EditText
             android:id="@+id/etPassword"
@@ -36,7 +40,9 @@
             android:layout_marginRight="16dp"
             android:hint="@string/password_enter"
             android:inputType="textPassword"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:text="123456789"
+            />
 
         <EditText
             android:id="@+id/tvPasswordAgain"
@@ -46,7 +52,10 @@
             android:layout_marginRight="16dp"
             android:hint="@string/password_enter_again"
             android:inputType="textPassword"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:text="123456789"
+
+            />
 
         <Button
             android:id="@+id/btnRegistration"

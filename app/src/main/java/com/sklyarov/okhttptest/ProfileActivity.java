@@ -10,6 +10,8 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.sklyarov.okhttptest.model.User;
+
 public class ProfileActivity extends AppCompatActivity {
     public static final String USER_KEY = "USER_KEY";
 

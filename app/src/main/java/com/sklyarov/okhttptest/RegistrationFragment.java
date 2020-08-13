@@ -18,16 +18,17 @@ import androidx.annotation.StringRes;
 import androidx.fragment.app.Fragment;
 
 import com.google.gson.Gson;
+import com.sklyarov.okhttptest.model.User;
 
 import java.io.IOException;
 
-import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
-import okhttp3.Response;
+import retrofit2.Call;
+import retrofit2.Response;
 
 public class RegistrationFragment extends Fragment {
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
@@ -51,43 +52,37 @@ public class RegistrationFragment extends Fragment {
                         mName.getText().toString(),
                         mPassword.getText().toString());
 
-                Request request = new Request.Builder()
-                        .url(BuildConfig.SERVER_URL.concat("/registration"))
-                        .post(RequestBody.create(JSON, new Gson().toJson(user)))
-                        .build();
+                ApiUtilities.getApiService().registration(user).enqueue(
+                        new retrofit2.Callback<Void>() {
+                            Handler mainHandler = new Handler(getActivity().getMainLooper());
 
-                OkHttpClient client = new OkHttpClient();
-
-                client.newCall(request).enqueue(new Callback() {
-                    //используем Handler, чтобы показывать ошибки в Main потоке, т.к. наши коллбеки возвращаются в рабочем потоке
-                    Handler mainHandler = new Handler(getActivity().getMainLooper());
-
-                    @Override
-                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                        mainHandler.post(new Runnable() {
                             @Override
-                            public void run() {
-                                showMessage(R.string.request_error);
+                            public void onResponse(Call<Void> call, final Response<Void> response) {
+                                mainHandler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (!response.isSuccessful()) {
+                                            //todo добавить полноценную обработку ошибок по кодам ответа от сервера и телу запроса
+                                            showMessage(R.string.registration_error);
+                                        } else {
+                                            showMessage(R.string.registration_success);
+                                            getFragmentManager().popBackStack();
+                                        }
+                                    }
+                                });
                             }
-                        });
-                    }
 
-                    @Override
-                    public void onResponse(@NonNull Call call, @NonNull final Response response) throws IOException {
-                        mainHandler.post(new Runnable() {
                             @Override
-                            public void run() {
-                                if (!response.isSuccessful()) {
-                                    //todo добавить полноценную обработку ошибок по кодам ответа от сервера и телу запроса
-                                    showMessage(R.string.registration_error);
-                                } else {
-                                    showMessage(R.string.registration_success);
-                                    getFragmentManager().popBackStack();
-                                }
+                            public void onFailure(Call<Void> call, Throwable t) {
+                                mainHandler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        showMessage(R.string.request_error);
+                                    }
+                                });
                             }
-                        });
-                    }
-                });
+                        }
+                );
             } else {
                 showMessage(R.string.input_error);
             }
@@ -96,7 +91,8 @@ public class RegistrationFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup
+            container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fr_registration, container, false);
 
         mEmail = view.findViewById(R.id.etEmail);
