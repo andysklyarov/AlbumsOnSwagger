@@ -18,6 +18,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.fragment.app.Fragment;
 
+import com.sklyarov.okhttptest.albums.AlbumsActivity;
 import com.sklyarov.okhttptest.model.User;
 import com.sklyarov.okhttptest.model.UserServerData;
 
@@ -46,7 +47,7 @@ public class AuthFragment extends Fragment {
                 String email = mEmail.getText().toString();
                 String password = mPassword.getText().toString();
 
-                ApiUtilities.getApiService().getUser(Credentials.basic(email, password)).enqueue(
+                ApiUtilities.getAuthApiService(email, password).getUser().enqueue(
                         new retrofit2.Callback<UserServerData>() {
                             Handler mainHandler = new Handler(getActivity().getMainLooper());
 
@@ -59,9 +60,11 @@ public class AuthFragment extends Fragment {
                                     } else {
                                         User user = response.body().getData();
 
-                                        Intent startProfileIntent = new Intent(getActivity(), ProfileActivity.class);
-                                        startProfileIntent.putExtra(ProfileActivity.USER_KEY, user);
-                                        startActivity(startProfileIntent);
+//                                        Intent startProfileIntent = new Intent(getActivity(), ProfileActivity.class);
+//                                        startProfileIntent.putExtra(ProfileActivity.USER_KEY, user);
+//                                        startActivity(startProfileIntent);
+
+                                        startActivity(new Intent(getActivity(), AlbumsActivity.class));
                                         getActivity().finish();
                                     }
                                 });

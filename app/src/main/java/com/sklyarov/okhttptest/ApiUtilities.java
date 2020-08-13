@@ -51,7 +51,7 @@ public class ApiUtilities {
 
     public static Retrofit getRetrofit() {
 
-        if(gson == null)
+        if (gson == null)
             gson = new Gson();
 
         if (retrofit == null) {
@@ -66,11 +66,31 @@ public class ApiUtilities {
         return retrofit;
     }
 
-    public static AcademyApi getApiService()
-    {
-        if(api == null)
+    public static Retrofit getAuthRetrofit(String email, String password) {
+
+        if (gson == null)
+            gson = new Gson();
+
+        retrofit = new Retrofit.Builder()
+                .baseUrl(BuildConfig.SERVER_URL)
+                //need for interceptors
+                .client(getBasicAuthClient(email, password, true))
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .build();
+
+
+        return retrofit;
+    }
+
+    public static AcademyApi getApiService() {
+        if (api == null)
             api = getRetrofit().create(AcademyApi.class);
 
+        return api;
+    }
+
+    public static AcademyApi getAuthApiService(String email, String password) {
+        api = getAuthRetrofit(email, password).create(AcademyApi.class);
         return api;
     }
 }

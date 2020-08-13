@@ -20,4 +20,5 @@
     <string name="response_code_400">Ошибка валидации</string>
     <string name="response_code_404">Альбома не существует</string>
 
+    <string name="error_text">Что-то пошло не так. Попробуйте еще раз.</string>
 </resources>
