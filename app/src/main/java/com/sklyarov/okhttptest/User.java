@@ -1,30 +1,59 @@
 package com.sklyarov.okhttptest;
 
-public class User {
-    private String email;
-    private String name;
-    private String password;
+import com.google.gson.annotations.SerializedName;
+
+import java.io.Serializable;
+
+public class User implements Serializable {
+    @SerializedName("email")
+    private String mEmail;
+    @SerializedName("name")
+    private String mName;
+    @SerializedName("password")
+    private String mPassword;
+
+    private boolean mHasSuccessEmail;
+
+    public User(String email, String password) {
+        mEmail = email;
+        mPassword = password;
+    }
 
     public User(String email, String name, String password) {
-        this.email = email;
-        this.name = name;
-        this.password = password;
+        mEmail = email;
+        mName = name;
+        mPassword = password;
     }
 
     public String getEmail() {
-        return email;
+        return mEmail;
+    }
+
+    public void setEmail(String email) {
+        mEmail = email;
+    }
+
+    public String getName() {
+        return mName;
+    }
+
+    public void setName(String name) {
+        mName = name;
     }
 
     public String getPassword() {
-        return password;
+        return mPassword;
     }
 
-    @Override
-    public String toString() {
-        return "User{" +
-                "email='" + email + '\'' +
-                ", name='" + name + '\'' +
-                ", password='" + password + '\'' +
-                '}';
+    public void setPassword(String password) {
+        mPassword = password;
+    }
+
+    public boolean hasSuccessEmail() {
+        return mHasSuccessEmail;
+    }
+
+    public void setHasSuccessEmail(boolean hasSuccessEmail) {
+        mHasSuccessEmail = hasSuccessEmail;
     }
 }
