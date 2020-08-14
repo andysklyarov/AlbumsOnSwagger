@@ -1,6 +1,8 @@
 package com.sklyarov.okhttptest;
 
 
+import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
@@ -12,23 +14,26 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.google.gson.Gson;
+import com.sklyarov.okhttptest.model.Errors;
 import com.sklyarov.okhttptest.model.User;
 
 import java.io.IOException;
+import java.util.List;
 
-import okhttp3.Callback;
 import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Response;
+
+import static com.sklyarov.okhttptest.model.ServerCodes.*;
+
 
 public class RegistrationFragment extends Fragment {
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
@@ -47,6 +52,15 @@ public class RegistrationFragment extends Fragment {
         @Override
         public void onClick(View view) {
             if (isInputValid()) {
+
+                Context context = getActivity();
+                if (context != null) {
+                    mEmail.setTextColor(ContextCompat.getColor(context, R.color.textColorPrimary));
+                    mName.setTextColor(ContextCompat.getColor(context, R.color.textColorPrimary));
+                    mPassword.setTextColor(ContextCompat.getColor(context, R.color.textColorPrimary));
+                }
+
+
                 User user = new User(
                         mEmail.getText().toString(),
                         mName.getText().toString(),
@@ -62,8 +76,43 @@ public class RegistrationFragment extends Fragment {
                                     @Override
                                     public void run() {
                                         if (!response.isSuccessful()) {
-                                            //todo добавить полноценную обработку ошибок по кодам ответа от сервера и телу запроса
-                                            showMessage(R.string.registration_error);
+                                            int responseCode = response.code();
+                                            switch (responseCode) {
+                                                case VALIDATION_FAILED:
+                                                    ResponseBody responseBody = response.errorBody();
+                                                    if (responseBody != null) {
+                                                        Errors.ErrorsBean errors = convertToError(responseBody).getErrors();
+
+                                                        String emailMessage = convertToMessage(errors.getEmail());
+                                                        if (emailMessage != null) {
+                                                            mEmail.setTextColor(Color.MAGENTA);
+                                                            showMessage(emailMessage);
+                                                        }
+
+                                                        String nameMessage = convertToMessage(errors.getName());
+                                                        if (nameMessage != null) {
+                                                            mName.setTextColor(Color.MAGENTA);
+                                                            showMessage(nameMessage);
+                                                        }
+
+                                                        String passwordMessage = convertToMessage(errors.getPassword());
+                                                        if (passwordMessage != null) {
+                                                            mPassword.setTextColor(Color.MAGENTA);
+                                                            showMessage(passwordMessage);
+                                                        }
+                                                    } else {
+                                                        showMessage(R.string.registration_error);
+                                                        return;
+                                                    }
+                                                    break;
+                                                case SERVER_INTERNAL_ERROR:
+                                                    showMessage(R.string.response_code_500);
+                                                    break;
+
+                                                default:
+                                                    showMessage(R.string.registration_error);
+                                                    break;
+                                            }
                                         } else {
                                             showMessage(R.string.registration_success);
                                             getFragmentManager().popBackStack();
@@ -88,6 +137,29 @@ public class RegistrationFragment extends Fragment {
             }
         }
     };
+
+    private String convertToMessage(List<String> emailErrors) {
+        StringBuilder errorMessage = new StringBuilder();
+        if (emailErrors != null && emailErrors.size() != 0) {
+            for (String error : emailErrors) {
+                errorMessage.append(error);
+            }
+            return errorMessage.toString();
+        } else {
+            return null;
+        }
+    }
+
+    private Errors convertToError(ResponseBody errorBody) {
+        Errors resultError = null;
+        Gson gson = new Gson();
+        try {
+            resultError = gson.fromJson(errorBody.string(), Errors.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return resultError;
+    }
 
     @Nullable
     @Override
@@ -126,6 +198,10 @@ public class RegistrationFragment extends Fragment {
     }
 
     private void showMessage(@StringRes int string) {
+        Toast.makeText(getActivity(), string, Toast.LENGTH_LONG).show();
+    }
+
+    private void showMessage(String string) {
         Toast.makeText(getActivity(), string, Toast.LENGTH_LONG).show();
     }
 

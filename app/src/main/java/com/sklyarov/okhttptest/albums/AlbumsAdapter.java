@@ -12,10 +12,14 @@ import com.sklyarov.okhttptest.model.Albums;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AlbumsAdapter extends RecyclerView.Adapter<AlbumsHolder>{
-
+public class AlbumsAdapter extends RecyclerView.Adapter<AlbumsHolder> {
 
     private final List<Albums.DataBean> mAlbums = new ArrayList();
+    private OnItemClickListener mListener;
+
+    public AlbumsAdapter(OnItemClickListener onItemClickListener) {
+        mListener = onItemClickListener;
+    }
 
     @Override
     public AlbumsHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -27,7 +31,7 @@ public class AlbumsAdapter extends RecyclerView.Adapter<AlbumsHolder>{
     @Override
     public void onBindViewHolder(AlbumsHolder holder, int position) {
         Albums.DataBean album = mAlbums.get(position);
-        holder.bind(album);
+        holder.bind(album, mListener);
     }
 
     @Override
@@ -35,12 +39,15 @@ public class AlbumsAdapter extends RecyclerView.Adapter<AlbumsHolder>{
         return mAlbums.size();
     }
 
-    public void addData(List<Albums.DataBean> data, boolean isRefreshed)
-    {
-        if(isRefreshed){
+    public void addData(List<Albums.DataBean> data, boolean isRefreshed) {
+        if (isRefreshed) {
             mAlbums.clear();
         }
         mAlbums.addAll(data);
         notifyDataSetChanged();
+    }
+
+    public interface OnItemClickListener {
+        void onItemClick(Albums.DataBean data);
     }
 }

@@ -2,6 +2,7 @@ package com.sklyarov.okhttptest.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.util.List;
 
 public class Albums {
@@ -16,7 +17,7 @@ public class Albums {
         this.data = data;
     }
 
-    public static class DataBean {
+    public static class DataBean implements Serializable {
         @SerializedName("id")
         private int id;
         @SerializedName("name")

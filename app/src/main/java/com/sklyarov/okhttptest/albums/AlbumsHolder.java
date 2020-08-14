@@ -13,7 +13,7 @@ public class AlbumsHolder extends RecyclerView.ViewHolder {
     private TextView mTitle;
     private TextView mRealiseDate;
 
-    public AlbumsHolder(View itemView){
+    public AlbumsHolder(View itemView) {
         super(itemView);
 
         mTitle = itemView.findViewById(R.id.tv_title);
@@ -21,8 +21,12 @@ public class AlbumsHolder extends RecyclerView.ViewHolder {
 
     }
 
-    public void bind(Albums.DataBean item){
+    public void bind(Albums.DataBean item, AlbumsAdapter.OnItemClickListener onItemClickListener) {
         mTitle.setText(item.getName());
         mRealiseDate.setText(item.getReleaseDate());
+
+        if (onItemClickListener != null) {
+            itemView.setOnClickListener(v -> onItemClickListener.onItemClick(item));
+        }
     }
 }

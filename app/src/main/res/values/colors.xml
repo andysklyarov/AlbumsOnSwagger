@@ -4,4 +4,5 @@
     <color name="colorPrimaryDark">#3700B3</color>
     <color name="colorAccent">#03DAC5</color>
     <color name="color_error_red">#d20e0e</color>
+    <color name="textColorPrimary">#FF000000</color>
 </resources>

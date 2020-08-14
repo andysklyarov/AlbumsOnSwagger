@@ -22,11 +22,15 @@ import com.sklyarov.okhttptest.albums.AlbumsActivity;
 import com.sklyarov.okhttptest.model.User;
 import com.sklyarov.okhttptest.model.UserServerData;
 
-import okhttp3.Credentials;
 import retrofit2.Call;
 import retrofit2.Response;
 
+import static com.sklyarov.okhttptest.model.ServerCodes.SERVER_INTERNAL_ERROR;
+import static com.sklyarov.okhttptest.model.ServerCodes.USER_NOT_AUTHORIZED;
+import static com.sklyarov.okhttptest.model.ServerCodes.VALIDATION_FAILED;
+
 public class AuthFragment extends Fragment {
+
     private AutoCompleteTextView mEmail;
     private EditText mPassword;
     private Button mEnter;
@@ -55,15 +59,24 @@ public class AuthFragment extends Fragment {
                             public void onResponse(Call<UserServerData> call, Response<UserServerData> response) {
                                 mainHandler.post(() -> {
                                     if (!response.isSuccessful()) {
-                                        //todo добавить полноценную обработку ошибок по кодам ответа от сервера и телу запроса
+
+                                        int responseCode = response.code();
+
+                                        switch (responseCode) {
+                                            case VALIDATION_FAILED:
+                                                showMessage(R.string.response_code_400);
+                                                break;
+                                            case USER_NOT_AUTHORIZED:
+                                                showMessage(R.string.response_code_401);
+                                                break;
+                                            case SERVER_INTERNAL_ERROR:
+                                                showMessage(R.string.response_code_500);
+                                                break;
+                                        }
+
                                         showMessage(R.string.auth_error);
                                     } else {
                                         User user = response.body().getData();
-
-//                                        Intent startProfileIntent = new Intent(getActivity(), ProfileActivity.class);
-//                                        startProfileIntent.putExtra(ProfileActivity.USER_KEY, user);
-//                                        startActivity(startProfileIntent);
-
                                         startActivity(new Intent(getActivity(), AlbumsActivity.class));
                                         getActivity().finish();
                                     }
@@ -72,7 +85,8 @@ public class AuthFragment extends Fragment {
 
                             @Override
                             public void onFailure(Call<UserServerData> call, Throwable t) {
-                                mainHandler.post(() -> showMessage(R.string.request_error));
+//                                mainHandler.post(() -> showMessage(R.string.request_error));
+                                mainHandler.post(() -> showMessage("Неверный логин или пароль"));
                             }
                         }
                 );
@@ -112,6 +126,10 @@ public class AuthFragment extends Fragment {
     }
 
     private void showMessage(@StringRes int string) {
+        Toast.makeText(getActivity(), string, Toast.LENGTH_LONG).show();
+    }
+
+    private void showMessage(String string) {
         Toast.makeText(getActivity(), string, Toast.LENGTH_LONG).show();
     }
 

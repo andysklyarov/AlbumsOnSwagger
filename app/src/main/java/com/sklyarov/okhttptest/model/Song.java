@@ -3,18 +3,7 @@ package com.sklyarov.okhttptest.model;
 import com.google.gson.annotations.SerializedName;
 
 public class Song {
-    @SerializedName("data")
-    private DataBean data;
 
-    public DataBean getData() {
-        return data;
-    }
-
-    public void setData(DataBean data) {
-        this.data = data;
-    }
-
-    public static class DataBean {
         @SerializedName("id")
         private int id;
         @SerializedName("name")
@@ -45,5 +34,4 @@ public class Song {
         public void setDuration(String duration) {
             this.duration = duration;
         }
-    }
 }

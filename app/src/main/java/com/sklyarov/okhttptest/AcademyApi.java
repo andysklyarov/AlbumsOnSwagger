@@ -29,7 +29,7 @@ public interface AcademyApi {
     Call<Albums> getAlbums();
 
     @GET("albums/{id}")
-    Call<Album> getAlbums(@Path("id") int id);
+    Call<Album> getAlbum(@Path("id") int id);
 
     @GET("songs")
     Call<Songs> getSongs();

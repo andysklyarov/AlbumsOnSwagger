@@ -1,10 +1,11 @@
-package com.sklyarov.okhttptest.albums;
+package com.sklyarov.okhttptest.album;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -13,30 +14,35 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.sklyarov.okhttptest.ApiUtilities;
 import com.sklyarov.okhttptest.R;
-import com.sklyarov.okhttptest.album.DetailAlbumFragment;
+import com.sklyarov.okhttptest.albums.AlbumsFragment;
+import com.sklyarov.okhttptest.model.Album;
 import com.sklyarov.okhttptest.model.Albums;
 
-import okhttp3.Credentials;
+import java.io.Serializable;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class AlbumsFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
+public class DetailAlbumFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
 
+    public static final String ALBUM_KEY = "ALBUM_KEY";
     private RecyclerView mRecycler;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private View mErrorView;
+    private Albums.DataBean mAlbum;
 
-    private final AlbumsAdapter mAlbumsAdapter = new AlbumsAdapter(album -> {
-        getFragmentManager().beginTransaction()
-                .replace(R.id.fragmentContainer, DetailAlbumFragment.newInstance(album))
-                .addToBackStack(DetailAlbumFragment.class.getSimpleName())
-                .commit();
-    });
+    @NonNull
+    private final SongsAdapter mSongAdapter = new SongsAdapter();
 
+    public static DetailAlbumFragment newInstance(Albums.DataBean album) {
+        Bundle args = new Bundle();
 
-    public static AlbumsFragment newInstance() {
-        return new AlbumsFragment();
+        args.putSerializable(ALBUM_KEY, album);
+
+        DetailAlbumFragment fragment = new DetailAlbumFragment();
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Nullable
@@ -56,9 +62,15 @@ public class AlbumsFragment extends Fragment implements SwipeRefreshLayout.OnRef
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        getActivity().setTitle(R.string.albums);
+
+        Bundle args = getArguments();
+        if (args != null) {
+            mAlbum = (Albums.DataBean) args.getSerializable(ALBUM_KEY);
+            getActivity().setTitle(mAlbum.getName());
+        }
+
         mRecycler.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mRecycler.setAdapter(mAlbumsAdapter);
+        mRecycler.setAdapter(mSongAdapter);
 
         onRefresh();
     }
@@ -73,13 +85,13 @@ public class AlbumsFragment extends Fragment implements SwipeRefreshLayout.OnRef
 
     private void getAlbums() {
 
-        ApiUtilities.getApiService().getAlbums().enqueue(new Callback<Albums>() {
+        ApiUtilities.getApiService().getAlbum(mAlbum.getId()).enqueue(new Callback<Album>() {
             @Override
-            public void onResponse(Call<Albums> call, Response<Albums> response) {
+            public void onResponse(Call<Album> call, Response<Album> response) {
                 if (response.isSuccessful()) {
                     mRecycler.setVisibility(View.VISIBLE);
                     mErrorView.setVisibility(View.GONE);
-                    mAlbumsAdapter.addData(response.body().getData(), true);
+                    mSongAdapter.addData(response.body().getData().getSongs(), true);
 
                 } else {
                     mRecycler.setVisibility(View.GONE);
@@ -89,7 +101,7 @@ public class AlbumsFragment extends Fragment implements SwipeRefreshLayout.OnRef
             }
 
             @Override
-            public void onFailure(Call<Albums> call, Throwable t) {
+            public void onFailure(Call<Album> call, Throwable t) {
                 mRecycler.setVisibility(View.GONE);
                 mErrorView.setVisibility(View.VISIBLE);
                 mSwipeRefreshLayout.setRefreshing(false);
