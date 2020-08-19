@@ -6,7 +6,7 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.sklyarov.okhttptest.R;
-import com.sklyarov.okhttptest.model.Albums;
+import com.sklyarov.okhttptest.model.Album;
 
 public class AlbumsHolder extends RecyclerView.ViewHolder {
 
@@ -21,7 +21,7 @@ public class AlbumsHolder extends RecyclerView.ViewHolder {
 
     }
 
-    public void bind(Albums.DataBean item, AlbumsAdapter.OnItemClickListener onItemClickListener) {
+    public void bind(Album item, AlbumsAdapter.OnItemClickListener onItemClickListener) {
         mTitle.setText(item.getName());
         mRealiseDate.setText(item.getReleaseDate());
 

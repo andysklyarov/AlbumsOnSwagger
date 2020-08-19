@@ -1,8 +1,8 @@
 package com.sklyarov.okhttptest;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Patterns;
 import android.view.LayoutInflater;
@@ -20,10 +20,12 @@ import androidx.fragment.app.Fragment;
 
 import com.sklyarov.okhttptest.albums.AlbumsActivity;
 import com.sklyarov.okhttptest.model.User;
-import com.sklyarov.okhttptest.model.UserServerData;
 
-import retrofit2.Call;
-import retrofit2.Response;
+import java.net.UnknownHostException;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
+import retrofit2.HttpException;
 
 import static com.sklyarov.okhttptest.model.ServerCodes.SERVER_INTERNAL_ERROR;
 import static com.sklyarov.okhttptest.model.ServerCodes.USER_NOT_AUTHORIZED;
@@ -35,15 +37,13 @@ public class AuthFragment extends Fragment {
     private EditText mPassword;
     private Button mEnter;
     private Button mRegister;
-    private SharedPreferencesHelper mSharedPreferencesHelper;
-
-    private ArrayAdapter<String> mEmailedUsersAdapter;
 
     public static AuthFragment newInstance() {
         return new AuthFragment();
     }
 
     private View.OnClickListener mOnEnterClickListener = new View.OnClickListener() {
+        @SuppressLint("CheckResult")
         @Override
         public void onClick(View view) {
             if (isEmailValid() && isPasswordValid()) {
@@ -51,61 +51,54 @@ public class AuthFragment extends Fragment {
                 String email = mEmail.getText().toString();
                 String password = mPassword.getText().toString();
 
-                ApiUtilities.getAuthApiService(email, password).getUser().enqueue(
-                        new retrofit2.Callback<UserServerData>() {
-                            Handler mainHandler = new Handler(getActivity().getMainLooper());
+                ApiUtilities.getAuthApiService(email, password)
+                        .getUser()
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(user -> {
+//                                    Intent startProfileIntent = new Intent(getActivity(), ProfileActivity.class);
+//                                    startProfileIntent.putExtra(ProfileActivity.USER_KEY, user);
+//                                    startActivity(startProfileIntent);
 
-                            @Override
-                            public void onResponse(Call<UserServerData> call, Response<UserServerData> response) {
-                                mainHandler.post(() -> {
-                                    if (!response.isSuccessful()) {
-
-                                        int responseCode = response.code();
-
-                                        switch (responseCode) {
-                                            case VALIDATION_FAILED:
-                                                showMessage(R.string.response_code_400);
-                                                break;
-                                            case USER_NOT_AUTHORIZED:
-                                                showMessage(R.string.response_code_401);
-                                                break;
-                                            case SERVER_INTERNAL_ERROR:
-                                                showMessage(R.string.response_code_500);
-                                                break;
-                                        }
-
-                                        showMessage(R.string.auth_error);
+                                    startActivity(new Intent(getActivity(), AlbumsActivity.class));
+                                    getActivity().finish();
+                                },
+                                throwable -> {
+                                    if (throwable instanceof HttpException) {
+                                        HttpException httpException = ((HttpException) throwable);
+                                        int responseCode = httpException.code();
+                                        ErrorHandling(responseCode);
+                                    } else if (throwable instanceof UnknownHostException) {
+                                        showMessage("Нет доступа к серверу. Проверьте соединение.");
                                     } else {
-                                        User user = response.body().getData();
-                                        startActivity(new Intent(getActivity(), AlbumsActivity.class));
-                                        getActivity().finish();
+                                        showMessage("Неверный логин или пароль");
                                     }
                                 });
-                            }
-
-                            @Override
-                            public void onFailure(Call<UserServerData> call, Throwable t) {
-//                                mainHandler.post(() -> showMessage(R.string.request_error));
-                                mainHandler.post(() -> showMessage("Неверный логин или пароль"));
-                            }
-                        }
-                );
             } else {
                 showMessage(R.string.input_error);
             }
         }
     };
 
-    private View.OnClickListener mOnRegisterClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            getFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.fragmentContainer, RegistrationFragment.newInstance())
-                    .addToBackStack(RegistrationFragment.class.getName())
-                    .commit();
+    private void ErrorHandling(int responseCode) {
+        switch (responseCode) {
+            case VALIDATION_FAILED:
+                showMessage(R.string.response_code_400);
+                break;
+            case USER_NOT_AUTHORIZED:
+                showMessage(R.string.response_code_401);
+                break;
+            case SERVER_INTERNAL_ERROR:
+                showMessage(R.string.response_code_500);
+                break;
         }
-    };
+    }
+
+    private View.OnClickListener mOnRegisterClickListener = view -> getFragmentManager()
+            .beginTransaction()
+            .replace(R.id.fragmentContainer, RegistrationFragment.newInstance())
+            .addToBackStack(RegistrationFragment.class.getName())
+            .commit();
 
     private View.OnFocusChangeListener mOnEmailFocusChangeListener = new View.OnFocusChangeListener() {
         @Override
@@ -138,8 +131,6 @@ public class AuthFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fr_auth, container, false);
 
-        mSharedPreferencesHelper = new SharedPreferencesHelper(getActivity());
-
         mEmail = v.findViewById(R.id.etEmail);
         mPassword = v.findViewById(R.id.etPassword);
         mEnter = v.findViewById(R.id.buttonEnter);
@@ -149,12 +140,6 @@ public class AuthFragment extends Fragment {
         mRegister.setOnClickListener(mOnRegisterClickListener);
         mEmail.setOnFocusChangeListener(mOnEmailFocusChangeListener);
 
-        mEmailedUsersAdapter = new ArrayAdapter<>(
-                getActivity(),
-                android.R.layout.simple_dropdown_item_1line,
-                mSharedPreferencesHelper.getSuccessEmails()
-        );
-        mEmail.setAdapter(mEmailedUsersAdapter);
         return v;
     }
 }

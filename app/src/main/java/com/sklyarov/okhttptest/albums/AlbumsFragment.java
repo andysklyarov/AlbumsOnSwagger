@@ -1,5 +1,6 @@
 package com.sklyarov.okhttptest.albums;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,14 +13,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.sklyarov.okhttptest.ApiUtilities;
+import com.sklyarov.okhttptest.App;
 import com.sklyarov.okhttptest.R;
 import com.sklyarov.okhttptest.album.DetailAlbumFragment;
-import com.sklyarov.okhttptest.model.Albums;
+import com.sklyarov.okhttptest.db.MusicDao;
 
-import okhttp3.Credentials;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 public class AlbumsFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
 
@@ -30,7 +30,7 @@ public class AlbumsFragment extends Fragment implements SwipeRefreshLayout.OnRef
     private final AlbumsAdapter mAlbumsAdapter = new AlbumsAdapter(album -> {
         getFragmentManager().beginTransaction()
                 .replace(R.id.fragmentContainer, DetailAlbumFragment.newInstance(album))
-                .addToBackStack(DetailAlbumFragment.class.getSimpleName())
+                .addToBackStack(DetailAlbumFragment.class.getSimpleName()) //todo !!! addToBackStack
                 .commit();
     });
 
@@ -66,34 +66,42 @@ public class AlbumsFragment extends Fragment implements SwipeRefreshLayout.OnRef
     @Override
     public void onRefresh() {
         mSwipeRefreshLayout.post(() -> {
-            mSwipeRefreshLayout.setRefreshing(true);
             getAlbums();
         });
     }
 
+    @SuppressLint("CheckResult")
     private void getAlbums() {
 
-        ApiUtilities.getApiService().getAlbums().enqueue(new Callback<Albums>() {
-            @Override
-            public void onResponse(Call<Albums> call, Response<Albums> response) {
-                if (response.isSuccessful()) {
-                    mRecycler.setVisibility(View.VISIBLE);
-                    mErrorView.setVisibility(View.GONE);
-                    mAlbumsAdapter.addData(response.body().getData(), true);
+        ApiUtilities.getApiService()
+                .getAlbums()
+                .subscribeOn(Schedulers.io())
+                .doOnSuccess(albums -> {
+                    getMusicDao().insertAlbums(albums);
+                })
+                .onErrorReturn(throwable -> {
+                    if (ApiUtilities.NETWORK_EXCEPTIONS.contains(throwable.getClass())) {
+                        return getMusicDao().getAlbums();
+                    } else {
+                        return null;
+                    }
+                })
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe(disposable -> mSwipeRefreshLayout.setRefreshing(true))
+                .doFinally(() -> mSwipeRefreshLayout.setRefreshing(false))
+                .subscribe(albums -> {
+                            mRecycler.setVisibility(View.VISIBLE);
+                            mErrorView.setVisibility(View.GONE);
+                            mAlbumsAdapter.addData(albums, true);
+                        },
+                        throwable -> {
+                            mRecycler.setVisibility(View.GONE);
+                            mErrorView.setVisibility(View.VISIBLE);
+                        });
+    }
 
-                } else {
-                    mRecycler.setVisibility(View.GONE);
-                    mErrorView.setVisibility(View.VISIBLE);
-                }
-                mSwipeRefreshLayout.setRefreshing(false);
-            }
-
-            @Override
-            public void onFailure(Call<Albums> call, Throwable t) {
-                mRecycler.setVisibility(View.GONE);
-                mErrorView.setVisibility(View.VISIBLE);
-                mSwipeRefreshLayout.setRefreshing(false);
-            }
-        });
+    private MusicDao getMusicDao() {
+        App app = (App)getActivity().getApplication();
+        return app.getDatabase().getMusicDao();
     }
 }

@@ -11,6 +11,8 @@ import com.sklyarov.okhttptest.R;
 import com.sklyarov.okhttptest.model.Song;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class SongsAdapter extends RecyclerView.Adapter<SongsHolder> {
@@ -42,11 +44,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsHolder> {
             mSongs.clear();
         }
 
-//        List<Song.DataBean> songs = new ArrayList<>();
-//
-//        for (int i = 0, size = data.size(); i < size; i++) {
-//            songs.add(data.get(i).getData());
-//        }
+        data.sort((a, b) -> a.getId() - b.getId());
 
         mSongs.addAll(data);
         notifyDataSetChanged();

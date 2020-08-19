@@ -1,10 +1,10 @@
 package com.sklyarov.okhttptest;
 
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Patterns;
 import android.view.LayoutInflater;
@@ -16,7 +16,6 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
@@ -26,13 +25,18 @@ import com.sklyarov.okhttptest.model.User;
 
 import java.io.IOException;
 import java.util.List;
+import java.net.UnknownHostException;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Predicate;
+import io.reactivex.schedulers.Schedulers;
 import okhttp3.MediaType;
 import okhttp3.ResponseBody;
-import retrofit2.Call;
+import retrofit2.HttpException;
 import retrofit2.Response;
 
-import static com.sklyarov.okhttptest.model.ServerCodes.*;
+import static com.sklyarov.okhttptest.model.ServerCodes.SERVER_INTERNAL_ERROR;
+import static com.sklyarov.okhttptest.model.ServerCodes.VALIDATION_FAILED;
 
 
 public class RegistrationFragment extends Fragment {
@@ -49,6 +53,7 @@ public class RegistrationFragment extends Fragment {
     }
 
     private View.OnClickListener mOnRegistrationClickListener = new View.OnClickListener() {
+        @SuppressLint("CheckResult")
         @Override
         public void onClick(View view) {
             if (isInputValid()) {
@@ -66,77 +71,76 @@ public class RegistrationFragment extends Fragment {
                         mName.getText().toString(),
                         mPassword.getText().toString());
 
-                ApiUtilities.getApiService().registration(user).enqueue(
-                        new retrofit2.Callback<Void>() {
-                            Handler mainHandler = new Handler(getActivity().getMainLooper());
+                ApiUtilities.getApiService()
+                        .registration(user)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(() -> {
+                                    showMessage(R.string.registration_success);
+                                    if (getFragmentManager() != null)
+                                        getFragmentManager().popBackStack();
+                                },
+                                throwable -> {
+                                    if (throwable instanceof HttpException) {
+                                        HttpException httpException = ((HttpException) throwable);
+                                        int responseCode = httpException.code();
 
-                            @Override
-                            public void onResponse(Call<Void> call, final Response<Void> response) {
-                                mainHandler.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        if (!response.isSuccessful()) {
-                                            int responseCode = response.code();
-                                            switch (responseCode) {
-                                                case VALIDATION_FAILED:
-                                                    ResponseBody responseBody = response.errorBody();
-                                                    if (responseBody != null) {
-                                                        Errors.ErrorsBean errors = convertToError(responseBody).getErrors();
+                                        Response<?> response = httpException.response();
+                                        ResponseBody responseBody = null;
+                                        if (response != null) responseBody = response.errorBody();
 
-                                                        String emailMessage = convertToMessage(errors.getEmail());
-                                                        if (emailMessage != null) {
-                                                            mEmail.setTextColor(Color.MAGENTA);
-                                                            showMessage(emailMessage);
-                                                        }
-
-                                                        String nameMessage = convertToMessage(errors.getName());
-                                                        if (nameMessage != null) {
-                                                            mName.setTextColor(Color.MAGENTA);
-                                                            showMessage(nameMessage);
-                                                        }
-
-                                                        String passwordMessage = convertToMessage(errors.getPassword());
-                                                        if (passwordMessage != null) {
-                                                            mPassword.setTextColor(Color.MAGENTA);
-                                                            showMessage(passwordMessage);
-                                                        }
-                                                    } else {
-                                                        showMessage(R.string.registration_error);
-                                                        return;
-                                                    }
-                                                    break;
-                                                case SERVER_INTERNAL_ERROR:
-                                                    showMessage(R.string.response_code_500);
-                                                    break;
-
-                                                default:
-                                                    showMessage(R.string.registration_error);
-                                                    break;
-                                            }
-                                        } else {
-                                            showMessage(R.string.registration_success);
-                                            getFragmentManager().popBackStack();
-                                        }
+                                        ErrorHandling(responseBody, responseCode);
+                                    } else if (throwable instanceof UnknownHostException) {
+                                        showMessage("Нет доступа к серверу. Проверьте соединение.");
+                                    } else {
+                                        showMessage(R.string.error_text);
                                     }
-                                });
-                            }
-
-                            @Override
-                            public void onFailure(Call<Void> call, Throwable t) {
-                                mainHandler.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        showMessage(R.string.request_error);
-                                    }
-                                });
-                            }
-                        }
-                );
+                                }
+                        );
             } else {
                 showMessage(R.string.input_error);
             }
         }
     };
+
+    private void ErrorHandling(ResponseBody responseBody, int responseCode) {
+        switch (responseCode) {
+            case VALIDATION_FAILED:
+                if (responseBody != null) {
+                    Errors.ErrorsBean errors = convertToError(responseBody).getErrors();
+
+                    String emailMessage = convertToMessage(errors.getEmail());
+                    if (emailMessage != null) {
+                        mEmail.setTextColor(Color.MAGENTA);
+                        showMessage(emailMessage);
+                    }
+
+                    String nameMessage = convertToMessage(errors.getName());
+                    if (nameMessage != null) {
+                        mName.setTextColor(Color.MAGENTA);
+                        showMessage(nameMessage);
+                    }
+
+                    String passwordMessage = convertToMessage(errors.getPassword());
+                    if (passwordMessage != null) {
+                        mPassword.setTextColor(Color.MAGENTA);
+                        showMessage(passwordMessage);
+                    }
+                } else {
+                    showMessage(R.string.registration_error);
+                    return;
+                }
+                break;
+
+            case SERVER_INTERNAL_ERROR:
+                showMessage(R.string.response_code_500);
+                break;
+
+            default:
+                showMessage(R.string.registration_error);
+                break;
+        }
+    }
 
     private String convertToMessage(List<String> emailErrors) {
         StringBuilder errorMessage = new StringBuilder();

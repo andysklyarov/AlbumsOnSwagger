@@ -3,11 +3,18 @@ package com.sklyarov.okhttptest;
 import android.os.Build;
 
 import com.google.gson.Gson;
+import com.sklyarov.okhttptest.model.converter.DataConverterFactory;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import okhttp3.Authenticator;
 import okhttp3.Credentials;
@@ -17,14 +24,20 @@ import okhttp3.Response;
 import okhttp3.Route;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiUtilities {
 
+    public static final List<Class<?>> NETWORK_EXCEPTIONS = Arrays.asList(
+            UnknownHostException.class,
+            SocketTimeoutException.class,
+            ConnectException.class
+    );
+
     private static OkHttpClient okHttpClient;
     private static Retrofit retrofit;
     private static Gson gson;
-
     private static AcademyApi api;
 
 
@@ -59,9 +72,10 @@ public class ApiUtilities {
                     .baseUrl(BuildConfig.SERVER_URL)
                     //need for interceptors
                     .client(getBasicAuthClient("", "", false))
+                    .addConverterFactory(new DataConverterFactory())
                     .addConverterFactory(GsonConverterFactory.create(gson))
+                    .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                     .build();
-
         }
         return retrofit;
     }
@@ -75,7 +89,9 @@ public class ApiUtilities {
                 .baseUrl(BuildConfig.SERVER_URL)
                 //need for interceptors
                 .client(getBasicAuthClient(email, password, true))
+                .addConverterFactory(new DataConverterFactory())
                 .addConverterFactory(GsonConverterFactory.create(gson))
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build();
 
 

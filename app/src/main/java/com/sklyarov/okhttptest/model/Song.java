@@ -1,14 +1,25 @@
 package com.sklyarov.okhttptest.model;
 
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
 import com.google.gson.annotations.SerializedName;
 
+@Entity
 public class Song {
 
         @SerializedName("id")
+        @PrimaryKey
+        @ColumnInfo(name = "id")
         private int id;
+
         @SerializedName("name")
+        @ColumnInfo (name = "name")
         private String name;
+
         @SerializedName("duration")
+        @ColumnInfo (name = "duration")
         private String duration;
 
         public int getId() {

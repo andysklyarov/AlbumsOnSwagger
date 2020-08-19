@@ -7,14 +7,14 @@ import android.view.ViewGroup;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.sklyarov.okhttptest.R;
-import com.sklyarov.okhttptest.model.Albums;
+import com.sklyarov.okhttptest.model.Album;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class AlbumsAdapter extends RecyclerView.Adapter<AlbumsHolder> {
 
-    private final List<Albums.DataBean> mAlbums = new ArrayList();
+    private final List<Album> mAlbums = new ArrayList();
     private OnItemClickListener mListener;
 
     public AlbumsAdapter(OnItemClickListener onItemClickListener) {
@@ -30,7 +30,7 @@ public class AlbumsAdapter extends RecyclerView.Adapter<AlbumsHolder> {
 
     @Override
     public void onBindViewHolder(AlbumsHolder holder, int position) {
-        Albums.DataBean album = mAlbums.get(position);
+        Album album = mAlbums.get(position);
         holder.bind(album, mListener);
     }
 
@@ -39,15 +39,18 @@ public class AlbumsAdapter extends RecyclerView.Adapter<AlbumsHolder> {
         return mAlbums.size();
     }
 
-    public void addData(List<Albums.DataBean> data, boolean isRefreshed) {
+    public void addData(List<Album> data, boolean isRefreshed) {
         if (isRefreshed) {
             mAlbums.clear();
         }
+
+        data.sort((a, b) -> a.getId() - b.getId());
+
         mAlbums.addAll(data);
         notifyDataSetChanged();
     }
 
     public interface OnItemClickListener {
-        void onItemClick(Albums.DataBean data);
+        void onItemClick(Album data);
     }
 }
