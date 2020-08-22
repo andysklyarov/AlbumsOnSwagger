@@ -91,7 +91,7 @@ public class RegistrationFragment extends Fragment {
 
                                         ErrorHandling(responseBody, responseCode);
                                     } else if (throwable instanceof UnknownHostException) {
-                                        showMessage("Нет доступа к серверу. Проверьте соединение.");
+                                        showMessage(R.string.host_error);
                                     } else {
                                         showMessage(R.string.error_text);
                                     }
@@ -111,18 +111,21 @@ public class RegistrationFragment extends Fragment {
 
                     String emailMessage = convertToMessage(errors.getEmail());
                     if (emailMessage != null) {
+                        mEmail.setError(emailMessage);
                         mEmail.setTextColor(Color.MAGENTA);
                         showMessage(emailMessage);
                     }
 
                     String nameMessage = convertToMessage(errors.getName());
                     if (nameMessage != null) {
+                        mName.setError(nameMessage);
                         mName.setTextColor(Color.MAGENTA);
                         showMessage(nameMessage);
                     }
 
                     String passwordMessage = convertToMessage(errors.getPassword());
                     if (passwordMessage != null) {
+                        mPassword.setError(passwordMessage);
                         mPassword.setTextColor(Color.MAGENTA);
                         showMessage(passwordMessage);
                     }

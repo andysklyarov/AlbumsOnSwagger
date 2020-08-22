@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">OkHTTPTest</string>
+    <string name="app_name">RX Java 2</string>
 
     <string name="email_hint">Логин</string>
     <string name="password">Пароль</string>
@@ -25,4 +25,13 @@
 
     <string name="error_text">Что-то пошло не так. Попробуйте еще раз.</string>
     <string name="albums">Альбомы</string>
+
+    <string name="comments_no_comments">Здесь коментов нет.</string>
+    <string name="comments_no_new">Новых комментариев нет</string>
+    <string name="comments_updated">Комментарии обновлены</string>
+    <string name="comments_error">Коменты не загружены. Включите интернет и попробуйте снова.</string>
+    <string name="comments_empty_text_to_send">Нет текста для отправки!</string>
+
+    <string name="host_error">Нет доступа к серверу. Проверьте соединение.</string>
+
 </resources>

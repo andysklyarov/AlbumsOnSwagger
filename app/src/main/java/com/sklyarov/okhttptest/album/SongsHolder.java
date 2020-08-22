@@ -11,18 +11,18 @@ import com.sklyarov.okhttptest.model.Song;
 
 public class SongsHolder extends RecyclerView.ViewHolder {
 
-    private TextView mTitles;
+    private TextView mTitle;
     private TextView mDuration;
 
     public SongsHolder(@NonNull View itemView) {
         super(itemView);
 
-        mTitles = itemView.findViewById(R.id.tv_title);
+        mTitle = itemView.findViewById(R.id.tv_title);
         mDuration = itemView.findViewById(R.id.tv_duration);
     }
 
-    public void bind(Song item){
-        mTitles.setText(item.getName());
+    public void bind(Song item) {
+        mTitle.setText(item.getName());
         mDuration.setText(item.getDuration());
     }
 }

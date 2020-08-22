@@ -33,6 +33,7 @@ import static com.sklyarov.okhttptest.model.ServerCodes.VALIDATION_FAILED;
 
 public class AuthFragment extends Fragment {
 
+    public static final String CURRENT_USER_KEY = "CURRENT_USER_KEY";
     private AutoCompleteTextView mEmail;
     private EditText mPassword;
     private Button mEnter;
@@ -51,16 +52,15 @@ public class AuthFragment extends Fragment {
                 String email = mEmail.getText().toString();
                 String password = mPassword.getText().toString();
 
-                ApiUtilities.getAuthApiService(email, password)
+                ApiUtilities.getApiService(email, password)
                         .getUser()
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(user -> {
-//                                    Intent startProfileIntent = new Intent(getActivity(), ProfileActivity.class);
-//                                    startProfileIntent.putExtra(ProfileActivity.USER_KEY, user);
-//                                    startActivity(startProfileIntent);
+                                    Intent startAlbumsIntent = new Intent(getActivity(), AlbumsActivity.class);
+                                    startAlbumsIntent.putExtra(CURRENT_USER_KEY, user.getName());
+                                    startActivity(startAlbumsIntent);
 
-                                    startActivity(new Intent(getActivity(), AlbumsActivity.class));
                                     getActivity().finish();
                                 },
                                 throwable -> {
@@ -110,12 +110,28 @@ public class AuthFragment extends Fragment {
     };
 
     private boolean isEmailValid() {
-        return !TextUtils.isEmpty(mEmail.getText())
-                && Patterns.EMAIL_ADDRESS.matcher(mEmail.getText()).matches();
+        boolean isValid = true;
+
+        if (TextUtils.isEmpty(mEmail.getText())) {
+            mEmail.setError("Не указан email");
+            isValid = false;
+        } else if (!Patterns.EMAIL_ADDRESS.matcher(mEmail.getText()).matches()) {
+            mEmail.setError("Неправильный email");
+            isValid = false;
+        }
+
+        return isValid;
     }
 
     private boolean isPasswordValid() {
-        return !TextUtils.isEmpty(mPassword.getText());
+        boolean isValid = true;
+
+        if (TextUtils.isEmpty(mPassword.getText())) {
+            mPassword.setError("Не указан пароль");
+            isValid = false;
+        }
+
+        return isValid;
     }
 
     private void showMessage(@StringRes int string) {

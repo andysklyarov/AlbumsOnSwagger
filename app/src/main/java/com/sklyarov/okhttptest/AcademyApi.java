@@ -1,6 +1,8 @@
 package com.sklyarov.okhttptest;
 
 import com.sklyarov.okhttptest.model.Album;
+import com.sklyarov.okhttptest.model.CommentToReceive;
+import com.sklyarov.okhttptest.model.CommentToSend;
 import com.sklyarov.okhttptest.model.Song;
 import com.sklyarov.okhttptest.model.User;
 
@@ -12,14 +14,17 @@ import io.reactivex.Single;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
-import retrofit2.http.Header;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface AcademyApi {
 
     @POST("registration")
     Completable registration(@Body User user);
+
+    @POST("comments")
+    Completable sendComment(@Body CommentToSend comment);
 
     @GET("user")
     Single<User> getUser();
@@ -35,4 +40,12 @@ public interface AcademyApi {
 
     @GET("songs/{id}")
     Call<Song> getSong(@Path("id") int id);
+
+    @GET("comments")
+    Single<List<CommentToReceive>> getComments(@Query("page") int page);
+
+
+
+    @GET("albums/{id}/comments")
+    Single<List<CommentToReceive>> getAlbumComments(@Path("id") int id);
 }

@@ -1,7 +1,5 @@
 package com.sklyarov.okhttptest.db;
 
-import android.database.Cursor;
-
 import androidx.room.Dao;
 import androidx.room.Delete;
 
@@ -11,6 +9,7 @@ import androidx.room.Query;
 
 
 import com.sklyarov.okhttptest.model.Album;
+import com.sklyarov.okhttptest.model.AlbumSong;
 import com.sklyarov.okhttptest.model.Song;
 
 import java.util.List;
@@ -42,7 +41,11 @@ public interface MusicDao {
     @Query("select * from Song")
     List<Song> getSongs();
 
-    //AlbumSong Query part
+
+    @Query("select * from song inner join albumsong on song.id = albumsong.song_id where album_id = :albumId order by song_id asc")
+    List<Song> getSongsFromAlbum(int albumId);
+
+
     @Query("select * from albumsong")
     List<AlbumSong> getAlbumSongs();
 }

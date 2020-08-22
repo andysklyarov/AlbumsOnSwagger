@@ -13,7 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.sklyarov.okhttptest.model.User;
 
 public class ProfileActivity extends AppCompatActivity {
-    public static final String USER_KEY = "USER_KEY";
+    private static final String USER_KEY = "USER_KEY";
 
     private TextView mEmail;
     private TextView mName;

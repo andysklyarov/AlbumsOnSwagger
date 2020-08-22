@@ -1,2 +1,2 @@
 include ':app'
-rootProject.name = "OkHTTPTest"
+rootProject.name = "RXJava2"

@@ -1,4 +1,4 @@
-package com.sklyarov.okhttptest.db;
+package com.sklyarov.okhttptest.model;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;

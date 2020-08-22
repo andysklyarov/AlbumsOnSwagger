@@ -4,6 +4,9 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -13,50 +16,82 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.room.util.DBUtil;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.sklyarov.okhttptest.ApiUtilities;
 import com.sklyarov.okhttptest.App;
+import com.sklyarov.okhttptest.AuthFragment;
+import com.sklyarov.okhttptest.ProfileActivity;
 import com.sklyarov.okhttptest.R;
-import com.sklyarov.okhttptest.db.AlbumSong;
+import com.sklyarov.okhttptest.comments.CommentsFragment;
+import com.sklyarov.okhttptest.db.DbUtils;
+import com.sklyarov.okhttptest.model.AlbumSong;
 import com.sklyarov.okhttptest.db.MusicDao;
 import com.sklyarov.okhttptest.model.Album;
 import com.sklyarov.okhttptest.model.Song;
-
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 public class DetailAlbumFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
 
     public static final String ALBUM_KEY = "ALBUM_KEY";
+
     private RecyclerView mRecycler;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private View mErrorView;
     private TextView mErrorViewText;
     private Album mAlbum;
+    private String currentUser;
+    private MusicDao musicDao;
 
     @NonNull
     private final SongsAdapter mSongAdapter = new SongsAdapter();
 
-    public static DetailAlbumFragment newInstance(Album album) {
+    public static DetailAlbumFragment newInstance(Album album, String currentUser) {
         Bundle args = new Bundle();
 
         args.putSerializable(ALBUM_KEY, album);
+        args.putString(AuthFragment.CURRENT_USER_KEY, currentUser);
 
         DetailAlbumFragment fragment = new DetailAlbumFragment();
         fragment.setArguments(args);
         return fragment;
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_albums, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_text) {
+
+            getFragmentManager().beginTransaction()
+                    .replace(R.id.fragmentContainer, CommentsFragment.newInstance(mAlbum, currentUser))
+                    .addToBackStack(CommentsFragment.class.getSimpleName())
+                    .commit();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fr_recycler, container, false);
+        return inflater.inflate(R.layout.fr_recycler_albums_n_songs, container, false);
     }
 
     @Override
@@ -76,10 +111,13 @@ public class DetailAlbumFragment extends Fragment implements SwipeRefreshLayout.
         if (args != null) {
             mAlbum = (Album) args.getSerializable(ALBUM_KEY);
             getActivity().setTitle(mAlbum.getName());
+            currentUser = args.getString(AuthFragment.CURRENT_USER_KEY);
         }
 
         mRecycler.setLayoutManager(new LinearLayoutManager(getActivity()));
         mRecycler.setAdapter(mSongAdapter);
+
+        musicDao = DbUtils.getDatabase(false, null).getMusicDao();
 
         onRefresh();
     }
@@ -101,14 +139,14 @@ public class DetailAlbumFragment extends Fragment implements SwipeRefreshLayout.
 
                     List<AlbumSong> newLinks = createNewLinks(albumId, songs);
 
-                    getMusicDao().insertSongs(songs);
-                    getMusicDao().insertLinksAlbumSongs(newLinks);
+                    musicDao.insertSongs(songs);
+                    musicDao.insertLinksAlbumSongs(newLinks);
                 })
                 .onErrorReturn(throwable -> {
                     if (ApiUtilities.NETWORK_EXCEPTIONS.contains(throwable.getClass())) {
                         int albumId = mAlbum.getId();
 
-                        List<Song> result = getSongsByAlbumId(albumId);
+                        List<Song> result = musicDao.getSongsFromAlbum(albumId);
 
                         mAlbum.setSongs(result);
                         return mAlbum;
@@ -139,23 +177,8 @@ public class DetailAlbumFragment extends Fragment implements SwipeRefreshLayout.
                         });
     }
 
-    @NotNull
-    private List<Song> getSongsByAlbumId(int albumId) { // todo avoid brute force
-        List<AlbumSong> links = getMusicDao().getAlbumSongs();
-        List<Song> allSongs = getMusicDao().getSongs();
-        List<Song> result = new ArrayList<>();
-        for (AlbumSong link : links) {
-            for (Song song : allSongs) {
-                if (song.getId() == link.getSongId() && link.getAlbumId() == albumId) {
-                    result.add(song);
-                }
-            }
-        }
-        return result;
-    }
-
     private List<AlbumSong> createNewLinks(int albumId, List<Song> songs) { // todo avoid brute force
-        List<AlbumSong> oldLinks = getMusicDao().getAlbumSongs();
+        List<AlbumSong> oldLinks = musicDao.getAlbumSongs();
         List<AlbumSong> newLinks = new ArrayList<>();
         for (Song song : songs) {
             boolean isLinkCreated = false;
@@ -170,15 +193,5 @@ public class DetailAlbumFragment extends Fragment implements SwipeRefreshLayout.
             }
         }
         return newLinks;
-    }
-
-    private MusicDao getMusicDao() {
-        App app = null;
-        Activity activity = getActivity();
-        if (activity != null) {
-            app = (App) activity.getApplication();
-            return app.getDatabase().getMusicDao();
-        }
-        return null;
     }
 }

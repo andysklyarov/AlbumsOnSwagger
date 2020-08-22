@@ -1,7 +1,5 @@
 package com.sklyarov.okhttptest;
 
-import android.os.Build;
-
 import com.google.gson.Gson;
 import com.sklyarov.okhttptest.model.converter.DataConverterFactory;
 
@@ -12,7 +10,6 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -46,16 +43,12 @@ public class ApiUtilities {
         if (newInstance || okHttpClient == null) {
             OkHttpClient.Builder builder = new OkHttpClient.Builder();
 
-            builder.authenticator(new Authenticator() {
-                @Nullable
-                @Override
-                public Request authenticate(@Nullable Route route, @NotNull Response response) throws IOException {
-                    String credentials = Credentials.basic(email, password);
-                    return response.request().newBuilder().header("Authorization", credentials).build();
-                }
+            builder.authenticator((route, response) -> {
+                String credentials = Credentials.basic(email, password);
+                return response.request().newBuilder().header("Authorization", credentials).build();
             });
 
-            builder.addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY));
+            builder.addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)); //todo avoid when realise
 
             okHttpClient = builder.build();
         }
@@ -63,24 +56,10 @@ public class ApiUtilities {
     }
 
     public static Retrofit getRetrofit() {
-
-        if (gson == null)
-            gson = new Gson();
-
-        if (retrofit == null) {
-            retrofit = new Retrofit.Builder()
-                    .baseUrl(BuildConfig.SERVER_URL)
-                    //need for interceptors
-                    .client(getBasicAuthClient("", "", false))
-                    .addConverterFactory(new DataConverterFactory())
-                    .addConverterFactory(GsonConverterFactory.create(gson))
-                    .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                    .build();
-        }
-        return retrofit;
+        return getRetrofit("", "");
     }
 
-    public static Retrofit getAuthRetrofit(String email, String password) {
+    public static Retrofit getRetrofit(String email, String password) {
 
         if (gson == null)
             gson = new Gson();
@@ -94,7 +73,6 @@ public class ApiUtilities {
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build();
 
-
         return retrofit;
     }
 
@@ -105,8 +83,8 @@ public class ApiUtilities {
         return api;
     }
 
-    public static AcademyApi getAuthApiService(String email, String password) {
-        api = getAuthRetrofit(email, password).create(AcademyApi.class);
+    public static AcademyApi getApiService(String email, String password) {
+        api = getRetrofit(email, password).create(AcademyApi.class);
         return api;
     }
 }

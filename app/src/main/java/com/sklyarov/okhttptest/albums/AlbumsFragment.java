@@ -10,12 +10,16 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.room.util.DBUtil;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.sklyarov.okhttptest.ApiUtilities;
 import com.sklyarov.okhttptest.App;
+import com.sklyarov.okhttptest.AuthFragment;
+import com.sklyarov.okhttptest.ProfileActivity;
 import com.sklyarov.okhttptest.R;
 import com.sklyarov.okhttptest.album.DetailAlbumFragment;
+import com.sklyarov.okhttptest.db.DbUtils;
 import com.sklyarov.okhttptest.db.MusicDao;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -26,23 +30,29 @@ public class AlbumsFragment extends Fragment implements SwipeRefreshLayout.OnRef
     private RecyclerView mRecycler;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private View mErrorView;
+    private String currentUser;
+    private MusicDao musicDao;
 
     private final AlbumsAdapter mAlbumsAdapter = new AlbumsAdapter(album -> {
         getFragmentManager().beginTransaction()
-                .replace(R.id.fragmentContainer, DetailAlbumFragment.newInstance(album))
-                .addToBackStack(DetailAlbumFragment.class.getSimpleName()) //todo !!! addToBackStack
+                .replace(R.id.fragmentContainer, DetailAlbumFragment.newInstance(album, currentUser))
+                .addToBackStack(DetailAlbumFragment.class.getSimpleName())
                 .commit();
     });
 
+    public static AlbumsFragment newInstance(String currentUser) {
+        Bundle args = new Bundle();
+        args.putString(AuthFragment.CURRENT_USER_KEY, currentUser);
 
-    public static AlbumsFragment newInstance() {
-        return new AlbumsFragment();
+        AlbumsFragment fragment = new AlbumsFragment();
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fr_recycler, container, false);
+        return inflater.inflate(R.layout.fr_recycler_albums_n_songs, container, false);
     }
 
     @Override
@@ -57,17 +67,25 @@ public class AlbumsFragment extends Fragment implements SwipeRefreshLayout.OnRef
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         getActivity().setTitle(R.string.albums);
+
+        Bundle args = getArguments();
+        if (args != null) {
+            currentUser = args.getString(AuthFragment.CURRENT_USER_KEY);
+        } else {
+            currentUser = null;
+        }
+
         mRecycler.setLayoutManager(new LinearLayoutManager(getActivity()));
         mRecycler.setAdapter(mAlbumsAdapter);
+
+        musicDao = DbUtils.getDatabase(false, null).getMusicDao();
 
         onRefresh();
     }
 
     @Override
     public void onRefresh() {
-        mSwipeRefreshLayout.post(() -> {
-            getAlbums();
-        });
+        mSwipeRefreshLayout.post(() -> getAlbums());
     }
 
     @SuppressLint("CheckResult")
@@ -77,11 +95,11 @@ public class AlbumsFragment extends Fragment implements SwipeRefreshLayout.OnRef
                 .getAlbums()
                 .subscribeOn(Schedulers.io())
                 .doOnSuccess(albums -> {
-                    getMusicDao().insertAlbums(albums);
+                    musicDao.insertAlbums(albums);
                 })
                 .onErrorReturn(throwable -> {
                     if (ApiUtilities.NETWORK_EXCEPTIONS.contains(throwable.getClass())) {
-                        return getMusicDao().getAlbums();
+                        return musicDao.getAlbums();
                     } else {
                         return null;
                     }
@@ -98,10 +116,5 @@ public class AlbumsFragment extends Fragment implements SwipeRefreshLayout.OnRef
                             mRecycler.setVisibility(View.GONE);
                             mErrorView.setVisibility(View.VISIBLE);
                         });
-    }
-
-    private MusicDao getMusicDao() {
-        App app = (App)getActivity().getApplication();
-        return app.getDatabase().getMusicDao();
     }
 }
