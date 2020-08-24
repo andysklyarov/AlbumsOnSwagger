@@ -1,19 +1,12 @@
 package com.sklyarov.okhttptest;
 
 
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-
-import com.sklyarov.okhttptest.model.User;
 
 public abstract class SingleFragmentActivity extends AppCompatActivity {
 

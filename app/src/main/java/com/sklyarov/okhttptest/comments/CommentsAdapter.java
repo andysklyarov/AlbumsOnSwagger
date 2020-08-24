@@ -8,7 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.sklyarov.okhttptest.R;
-import com.sklyarov.okhttptest.model.CommentToReceive;
+import com.sklyarov.okhttptest.model.Comment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +19,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentHolder> {
     private static final int VIEW_TYPE_MESSAGE_RECEIVED = 2;
 
     @NonNull
-    private final List<CommentToReceive> messages = new ArrayList<>();
+    private final List<Comment> messages = new ArrayList<>();
     private String currentUser;
 
     public CommentsAdapter(String currentUser) {
@@ -28,7 +28,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentHolder> {
 
     @Override
     public int getItemViewType(int position) {
-        CommentToReceive message = messages.get(position);
+        Comment message = messages.get(position);
         String sender = message.getAuthor();
 
         if (currentUser.equals(sender)) {
@@ -57,7 +57,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull CommentHolder holder, int position) {
-        CommentToReceive message = messages.get(position);
+        Comment message = messages.get(position);
         holder.bind(message);
     }
 
@@ -66,7 +66,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentHolder> {
         return messages.size();
     }
 
-    public void addData(List<CommentToReceive> data, boolean isRefreshed) {
+    public void addData(List<Comment> data, boolean isRefreshed) {
         if (isRefreshed) {
             messages.clear();
         }

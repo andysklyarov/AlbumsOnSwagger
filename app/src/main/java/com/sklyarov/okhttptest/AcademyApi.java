@@ -1,11 +1,9 @@
 package com.sklyarov.okhttptest;
 
 import com.sklyarov.okhttptest.model.Album;
-import com.sklyarov.okhttptest.model.CommentToReceive;
-import com.sklyarov.okhttptest.model.CommentToSend;
+import com.sklyarov.okhttptest.model.Comment;
 import com.sklyarov.okhttptest.model.Song;
 import com.sklyarov.okhttptest.model.User;
-
 
 import java.util.List;
 
@@ -24,7 +22,7 @@ public interface AcademyApi {
     Completable registration(@Body User user);
 
     @POST("comments")
-    Completable sendComment(@Body CommentToSend comment);
+    Completable sendComment(@Body Comment comment);
 
     @GET("user")
     Single<User> getUser();
@@ -42,10 +40,8 @@ public interface AcademyApi {
     Call<Song> getSong(@Path("id") int id);
 
     @GET("comments")
-    Single<List<CommentToReceive>> getComments(@Query("page") int page);
-
-
+    Single<List<Comment>> getComments(@Query("page") int page);
 
     @GET("albums/{id}/comments")
-    Single<List<CommentToReceive>> getAlbumComments(@Path("id") int id);
+    Single<List<Comment>> getAlbumComments(@Path("id") int id);
 }

@@ -2,14 +2,13 @@ package com.sklyarov.okhttptest.db;
 
 import androidx.room.Dao;
 import androidx.room.Delete;
-
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
-
 import com.sklyarov.okhttptest.model.Album;
 import com.sklyarov.okhttptest.model.AlbumSong;
+import com.sklyarov.okhttptest.model.Comment;
 import com.sklyarov.okhttptest.model.Song;
 
 import java.util.List;
@@ -27,10 +26,19 @@ public interface MusicDao {
     void insertLinksAlbumSongs(List<AlbumSong> linksAlbumSongs);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void setLinkAlbumSong(AlbumSong linkAlbumSong);
+    void insertComments(List<Comment> comments);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insertOneComment(Comment comment);
 
     @Query("select * from album")
     List<Album> getAlbums();
+
+    @Query("select * from comment")
+    List<Comment> getComments();
+
+    @Query("select * from comment where album_id = :albumId")
+    List<Comment> getCommentsByAlbumId(int albumId);
 
     @Delete
     void deleteAlbum(Album album);

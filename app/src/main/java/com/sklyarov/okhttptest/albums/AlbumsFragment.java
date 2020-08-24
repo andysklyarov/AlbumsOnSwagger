@@ -10,13 +10,10 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.room.util.DBUtil;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.sklyarov.okhttptest.ApiUtilities;
-import com.sklyarov.okhttptest.App;
 import com.sklyarov.okhttptest.AuthFragment;
-import com.sklyarov.okhttptest.ProfileActivity;
 import com.sklyarov.okhttptest.R;
 import com.sklyarov.okhttptest.album.DetailAlbumFragment;
 import com.sklyarov.okhttptest.db.DbUtils;
@@ -78,7 +75,7 @@ public class AlbumsFragment extends Fragment implements SwipeRefreshLayout.OnRef
         mRecycler.setLayoutManager(new LinearLayoutManager(getActivity()));
         mRecycler.setAdapter(mAlbumsAdapter);
 
-        musicDao = DbUtils.getDatabase(false, null).getMusicDao();
+        musicDao = DbUtils.getDatabase().getMusicDao();
 
         onRefresh();
     }

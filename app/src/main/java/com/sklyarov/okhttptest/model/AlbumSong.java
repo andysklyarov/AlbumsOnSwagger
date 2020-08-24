@@ -6,9 +6,6 @@ import androidx.room.ForeignKey;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
-import com.sklyarov.okhttptest.model.Album;
-import com.sklyarov.okhttptest.model.Song;
-
 @Entity(foreignKeys = {
         @ForeignKey(entity = Album.class, parentColumns = "id", childColumns = "album_id"),
         @ForeignKey(entity = Song.class, parentColumns = "id", childColumns = "song_id")})

@@ -24,11 +24,10 @@ import com.sklyarov.okhttptest.model.Errors;
 import com.sklyarov.okhttptest.model.User;
 
 import java.io.IOException;
-import java.util.List;
 import java.net.UnknownHostException;
+import java.util.List;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.MediaType;
 import okhttp3.ResponseBody;

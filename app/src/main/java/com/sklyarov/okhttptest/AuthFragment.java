@@ -8,7 +8,6 @@ import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -19,7 +18,6 @@ import androidx.annotation.StringRes;
 import androidx.fragment.app.Fragment;
 
 import com.sklyarov.okhttptest.albums.AlbumsActivity;
-import com.sklyarov.okhttptest.model.User;
 
 import java.net.UnknownHostException;
 

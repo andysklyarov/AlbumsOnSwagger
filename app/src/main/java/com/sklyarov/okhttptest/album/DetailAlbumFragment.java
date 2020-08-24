@@ -1,7 +1,6 @@
 package com.sklyarov.okhttptest.album;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -16,26 +15,22 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.room.util.DBUtil;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.sklyarov.okhttptest.ApiUtilities;
-import com.sklyarov.okhttptest.App;
 import com.sklyarov.okhttptest.AuthFragment;
-import com.sklyarov.okhttptest.ProfileActivity;
 import com.sklyarov.okhttptest.R;
 import com.sklyarov.okhttptest.comments.CommentsFragment;
 import com.sklyarov.okhttptest.db.DbUtils;
-import com.sklyarov.okhttptest.model.AlbumSong;
 import com.sklyarov.okhttptest.db.MusicDao;
 import com.sklyarov.okhttptest.model.Album;
+import com.sklyarov.okhttptest.model.AlbumSong;
 import com.sklyarov.okhttptest.model.Song;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 public class DetailAlbumFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
@@ -117,7 +112,7 @@ public class DetailAlbumFragment extends Fragment implements SwipeRefreshLayout.
         mRecycler.setLayoutManager(new LinearLayoutManager(getActivity()));
         mRecycler.setAdapter(mSongAdapter);
 
-        musicDao = DbUtils.getDatabase(false, null).getMusicDao();
+        musicDao = DbUtils.getDatabase().getMusicDao();
 
         onRefresh();
     }

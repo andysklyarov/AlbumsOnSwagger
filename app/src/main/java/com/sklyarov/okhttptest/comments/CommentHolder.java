@@ -6,7 +6,7 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.sklyarov.okhttptest.R;
-import com.sklyarov.okhttptest.model.CommentToReceive;
+import com.sklyarov.okhttptest.model.Comment;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -30,7 +30,7 @@ public class CommentHolder extends RecyclerView.ViewHolder {
         nameText = itemView.findViewById(R.id.text_message_name);
     }
 
-    void bind(CommentToReceive message) {
+    void bind(Comment message) {
 
         String commentTimeString = message.getTimestamp();
         LocalDateTime commentDateTime = LocalDateTime.parse(commentTimeString, DateTimeFormatter.ofPattern(INPUT_DATE_TIME_PATTERN));

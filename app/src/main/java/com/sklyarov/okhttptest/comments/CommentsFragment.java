@@ -21,10 +21,13 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.sklyarov.okhttptest.ApiUtilities;
 import com.sklyarov.okhttptest.AuthFragment;
 import com.sklyarov.okhttptest.R;
+import com.sklyarov.okhttptest.db.DbUtils;
+import com.sklyarov.okhttptest.db.MusicDao;
 import com.sklyarov.okhttptest.model.Album;
-import com.sklyarov.okhttptest.model.CommentToSend;
+import com.sklyarov.okhttptest.model.Comment;
 
 import java.net.UnknownHostException;
+import java.util.List;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -48,6 +51,10 @@ public class CommentsFragment extends Fragment implements SwipeRefreshLayout.OnR
     private boolean isFirstRun = true;
 
     private CommentsAdapter mCommentsAdapter;
+
+    private MusicDao musicDao;
+    private boolean isNoConnection = false;
+
 
     public static CommentsFragment newInstance(Album albumId, String currentUser) {
         Bundle args = new Bundle();
@@ -108,6 +115,8 @@ public class CommentsFragment extends Fragment implements SwipeRefreshLayout.OnR
         mCommentsAdapter = new CommentsAdapter(currentUser);
         mRecycler.setAdapter(mCommentsAdapter);
 
+        musicDao = DbUtils.getDatabase().getMusicDao();
+
         onRefresh();
     }
 
@@ -122,6 +131,25 @@ public class CommentsFragment extends Fragment implements SwipeRefreshLayout.OnR
         ApiUtilities.getApiService()
                 .getAlbumComments(albumId)
                 .subscribeOn(Schedulers.io())
+                .doOnSuccess(comments -> {
+                    musicDao.insertComments(comments);
+                    isNoConnection = false;
+                })
+                .onErrorReturn(throwable -> {
+                    List<Comment> comments = null;
+
+                    if (ApiUtilities.NETWORK_EXCEPTIONS.contains(throwable.getClass())) {
+                        comments = musicDao.getCommentsByAlbumId(albumId);
+
+                        if (comments.size() == 0)
+                            comments = null;
+                    }
+
+                    isFirstRun = true;
+                    isNoConnection = true;
+
+                    return comments;
+                })
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe(disposable -> mSwipeRefreshLayout.setRefreshing(true))
                 .doFinally(() -> {
@@ -129,7 +157,6 @@ public class CommentsFragment extends Fragment implements SwipeRefreshLayout.OnR
                     isFirstRun = false;
                 })
                 .subscribe(comments -> {
-
                             if (comments.size() == 0) {
                                 mRecycler.setVisibility(View.GONE);
                                 mErrorViewText.setText(R.string.comments_no_comments);
@@ -144,6 +171,8 @@ public class CommentsFragment extends Fragment implements SwipeRefreshLayout.OnR
                                     mCommentsAdapter.addData(comments, true);
                                     if (!isFirstRun) showMessage(R.string.comments_updated);
                                 }
+
+                                if (isNoConnection) showMessage(R.string.host_error_no_connection);
                             }
                         }
                         , throwable -> {
@@ -154,16 +183,18 @@ public class CommentsFragment extends Fragment implements SwipeRefreshLayout.OnR
 
     }
 
+//    private static final String DATE_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss+00:00";
+
     @SuppressLint("CheckResult")
     private void sendComment(String text, int albumId) {
 
         ApiUtilities.getApiService()
-                .sendComment(new CommentToSend(text, albumId))
+                .sendComment(new Comment(text, albumId))
                 .subscribeOn(Schedulers.io())
+                .doFinally(this::onRefresh)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(() -> {
                             showMessage(R.string.registration_success);
-                            onRefresh();
                         }
                         , throwable -> {
                             if (throwable instanceof HttpException) {
@@ -176,7 +207,7 @@ public class CommentsFragment extends Fragment implements SwipeRefreshLayout.OnR
                                     showMessage(R.string.registration_error);
                                 }
                             } else if (throwable instanceof UnknownHostException) {
-                                showMessage(R.string.host_error);
+                                showMessage(R.string.host_error_no_connection);
                             } else {
                                 showMessage(R.string.error_text);
                             }
