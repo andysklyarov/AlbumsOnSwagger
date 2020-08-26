@@ -1,5 +1,5 @@
 # AlbumsOnSwagger
-Образовательный проект программы "Многопоточность и сетевое взаимодействие в Android"
+Образовательный проект курса ["Многопоточность и сетевое взаимодействие в Android"](https://www.coursera.org/learn/android-multithreading-and-network) 
 
 # Технологии 
 Layout:
@@ -20,11 +20,8 @@ Database:
 - Room
 
 ## Экраны приложения
-![Регистрация](/screenshots/reg.jpg =250x250)
-![Аутентификация](/screenshots/auth.jpg =250x250)
-![Альбомы](/screenshots/albums.jpg =250x250)
-![Песни](/screenshots/songs.jpg =250x250)
-![Коменты](/screenshots/comments.jpg =250x250)
+
+<img src="screenshots/reg.jpg" width="200"> <img src="screenshots/auth.jpg" width="200"> <img src="screenshots/albums.jpg" width="200"> <img src="screenshots/songs.jpg" width="200"> <img src="screenshots/comments.jpg" width="200">
 
 ## Требования к проектоному заданию
 1. Сделать переход с детального описания альбома (списка песен этого альбома) к комментированию 
