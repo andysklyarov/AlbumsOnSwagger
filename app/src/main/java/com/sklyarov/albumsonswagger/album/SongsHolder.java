@@ -11,18 +11,18 @@ import com.sklyarov.albumsonswagger.model.Song;
 
 public class SongsHolder extends RecyclerView.ViewHolder {
 
-    private TextView mTitle;
-    private TextView mDuration;
+    private TextView title;
+    private TextView duration;
 
     public SongsHolder(@NonNull View itemView) {
         super(itemView);
 
-        mTitle = itemView.findViewById(R.id.tv_title);
-        mDuration = itemView.findViewById(R.id.tv_duration);
+        title = itemView.findViewById(R.id.tv_title);
+        duration = itemView.findViewById(R.id.tv_duration);
     }
 
     public void bind(Song item) {
-        mTitle.setText(item.getName());
-        mDuration.setText(item.getDuration());
+        title.setText(item.getName());
+        duration.setText(item.getDuration());
     }
 }

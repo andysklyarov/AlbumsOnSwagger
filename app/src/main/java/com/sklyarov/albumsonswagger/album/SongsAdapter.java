@@ -16,7 +16,7 @@ import java.util.List;
 public class SongsAdapter extends RecyclerView.Adapter<SongsHolder> {
 
     @NonNull
-    private final List<Song> mSongs = new ArrayList<>();
+    private final List<Song> songs = new ArrayList<>();
 
     @NonNull
     @Override
@@ -28,23 +28,23 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull SongsHolder holder, int position) {
-        Song song = mSongs.get(position);
+        Song song = songs.get(position);
         holder.bind(song);
     }
 
     @Override
     public int getItemCount() {
-        return mSongs.size();
+        return songs.size();
     }
 
     public void addData(List<Song> data, boolean isRefreshed) {
         if (isRefreshed) {
-            mSongs.clear();
+            songs.clear();
         }
 
         data.sort((a, b) -> a.getId() - b.getId());
 
-        mSongs.addAll(data);
+        songs.addAll(data);
         notifyDataSetChanged();
     }
 }

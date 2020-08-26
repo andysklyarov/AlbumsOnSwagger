@@ -6,7 +6,7 @@
     <string name="password_enter">Введите пароль</string>
     <string name="password_enter_again">Введите пароль ещё раз</string>
     <string name="enter">Войти</string>
-    <string name="registration">Зарегистрироваться</string>
+    <string name="registration">Регистрация</string>
     <string name="input_error">Ошибка ввода данных!</string>
     <string name="email">Email</string>
     <string name="request_error">Ошибка выполнения запроса!</string>
@@ -14,6 +14,9 @@
     <string name="registration_success">Успешно!</string>
     <string name="logout">Логаут</string>
     <string name="auth_error">Ошибка авторизации. Неверный логин или пароль.</string>
+    <string name="auth_error_no_email">Не указан email.</string>
+    <string name="auth_error_wrong_email">Неправильный email.</string>
+    <string name="auth_error_no_password">"Не указан пароль.</string>
     <string name="name">Имя</string>
 
     <string name="response_code_204">Успешная регистрация</string>
@@ -34,5 +37,7 @@
 
     <string name="host_error">Нет доступа к серверу. Проверьте соединение.</string>
     <string name="host_error_no_connection">Нет подключения</string>
+    <string name="default_mail">j12@mail.com</string>
+    <string name="default_password">123456789</string>
 
 </resources>

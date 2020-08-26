@@ -14,6 +14,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.sklyarov.albumsonswagger.ApiUtilities;
 import com.sklyarov.albumsonswagger.AuthFragment;
+import com.sklyarov.albumsonswagger.CardDecoration;
 import com.sklyarov.albumsonswagger.R;
 import com.sklyarov.albumsonswagger.album.DetailAlbumFragment;
 import com.sklyarov.albumsonswagger.db.DbUtils;
@@ -24,9 +25,9 @@ import io.reactivex.schedulers.Schedulers;
 
 public class AlbumsFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
 
-    private RecyclerView mRecycler;
-    private SwipeRefreshLayout mSwipeRefreshLayout;
-    private View mErrorView;
+    private RecyclerView recycler;
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private View errorView;
     private String currentUser;
     private MusicDao musicDao;
 
@@ -54,10 +55,10 @@ public class AlbumsFragment extends Fragment implements SwipeRefreshLayout.OnRef
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        mRecycler = view.findViewById(R.id.recycler);
-        mSwipeRefreshLayout = view.findViewById(R.id.refresher);
-        mSwipeRefreshLayout.setOnRefreshListener(this);
-        mErrorView = view.findViewById(R.id.error_view);
+        recycler = view.findViewById(R.id.recycler);
+        swipeRefreshLayout = view.findViewById(R.id.refresher);
+        swipeRefreshLayout.setOnRefreshListener(this);
+        errorView = view.findViewById(R.id.error_view);
     }
 
     @Override
@@ -72,8 +73,9 @@ public class AlbumsFragment extends Fragment implements SwipeRefreshLayout.OnRef
             currentUser = null;
         }
 
-        mRecycler.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mRecycler.setAdapter(mAlbumsAdapter);
+        recycler.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recycler.setAdapter(mAlbumsAdapter);
+        recycler.addItemDecoration(new CardDecoration());
 
         musicDao = DbUtils.getDatabase().getMusicDao();
 
@@ -82,7 +84,7 @@ public class AlbumsFragment extends Fragment implements SwipeRefreshLayout.OnRef
 
     @Override
     public void onRefresh() {
-        mSwipeRefreshLayout.post(() -> getAlbums());
+        swipeRefreshLayout.post(() -> getAlbums());
     }
 
     @SuppressLint("CheckResult")
@@ -102,16 +104,16 @@ public class AlbumsFragment extends Fragment implements SwipeRefreshLayout.OnRef
                     }
                 })
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe(disposable -> mSwipeRefreshLayout.setRefreshing(true))
-                .doFinally(() -> mSwipeRefreshLayout.setRefreshing(false))
+                .doOnSubscribe(disposable -> swipeRefreshLayout.setRefreshing(true))
+                .doFinally(() -> swipeRefreshLayout.setRefreshing(false))
                 .subscribe(albums -> {
-                            mRecycler.setVisibility(View.VISIBLE);
-                            mErrorView.setVisibility(View.GONE);
+                            recycler.setVisibility(View.VISIBLE);
+                            errorView.setVisibility(View.GONE);
                             mAlbumsAdapter.addData(albums, true);
                         },
                         throwable -> {
-                            mRecycler.setVisibility(View.GONE);
-                            mErrorView.setVisibility(View.VISIBLE);
+                            recycler.setVisibility(View.GONE);
+                            errorView.setVisibility(View.VISIBLE);
                         });
     }
 }

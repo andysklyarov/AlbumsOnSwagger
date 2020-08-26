@@ -29,7 +29,6 @@ import java.util.List;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-import okhttp3.MediaType;
 import okhttp3.ResponseBody;
 import retrofit2.HttpException;
 import retrofit2.Response;
@@ -39,8 +38,6 @@ import static com.sklyarov.albumsonswagger.model.ServerCodes.VALIDATION_FAILED;
 
 
 public class RegistrationFragment extends Fragment {
-    public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-
     private EditText mEmail;
     private EditText mName;
     private EditText mPassword;

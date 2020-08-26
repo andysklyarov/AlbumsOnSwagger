@@ -14,11 +14,11 @@ import java.util.List;
 
 public class AlbumsAdapter extends RecyclerView.Adapter<AlbumsHolder> {
 
-    private final List<Album> mAlbums = new ArrayList();
-    private OnItemClickListener mListener;
+    private final List<Album> albums = new ArrayList();
+    private OnItemClickListener listener;
 
     public AlbumsAdapter(OnItemClickListener onItemClickListener) {
-        mListener = onItemClickListener;
+        listener = onItemClickListener;
     }
 
     @Override
@@ -30,23 +30,23 @@ public class AlbumsAdapter extends RecyclerView.Adapter<AlbumsHolder> {
 
     @Override
     public void onBindViewHolder(AlbumsHolder holder, int position) {
-        Album album = mAlbums.get(position);
-        holder.bind(album, mListener);
+        Album album = albums.get(position);
+        holder.bind(album, listener);
     }
 
     @Override
     public int getItemCount() {
-        return mAlbums.size();
+        return albums.size();
     }
 
     public void addData(List<Album> data, boolean isRefreshed) {
         if (isRefreshed) {
-            mAlbums.clear();
+            albums.clear();
         }
 
         data.sort((a, b) -> a.getId() - b.getId());
 
-        mAlbums.addAll(data);
+        albums.addAll(data);
         notifyDataSetChanged();
     }
 

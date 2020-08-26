@@ -67,9 +67,9 @@ public class AuthFragment extends Fragment {
                                         int responseCode = httpException.code();
                                         ErrorHandling(responseCode);
                                     } else if (throwable instanceof UnknownHostException) {
-                                        showMessage("Нет доступа к серверу. Проверьте соединение.");
+                                        showMessage(R.string.host_error);
                                     } else {
-                                        showMessage("Неверный логин или пароль");
+                                        showMessage(R.string.auth_error);
                                     }
                                 });
             } else {
@@ -111,10 +111,10 @@ public class AuthFragment extends Fragment {
         boolean isValid = true;
 
         if (TextUtils.isEmpty(mEmail.getText())) {
-            mEmail.setError("Не указан email");
+            mEmail.setError(getString(R.string.auth_error_no_email));
             isValid = false;
         } else if (!Patterns.EMAIL_ADDRESS.matcher(mEmail.getText()).matches()) {
-            mEmail.setError("Неправильный email");
+            mEmail.setError(getString(R.string.auth_error_wrong_email));
             isValid = false;
         }
 
@@ -125,7 +125,7 @@ public class AuthFragment extends Fragment {
         boolean isValid = true;
 
         if (TextUtils.isEmpty(mPassword.getText())) {
-            mPassword.setError("Не указан пароль");
+            mPassword.setError(getString(R.string.auth_error_no_password));
             isValid = false;
         }
 
@@ -133,10 +133,6 @@ public class AuthFragment extends Fragment {
     }
 
     private void showMessage(@StringRes int string) {
-        Toast.makeText(getActivity(), string, Toast.LENGTH_LONG).show();
-    }
-
-    private void showMessage(String string) {
         Toast.makeText(getActivity(), string, Toast.LENGTH_LONG).show();
     }
 

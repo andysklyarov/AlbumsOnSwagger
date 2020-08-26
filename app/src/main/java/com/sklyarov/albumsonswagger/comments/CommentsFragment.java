@@ -39,12 +39,12 @@ public class CommentsFragment extends Fragment implements SwipeRefreshLayout.OnR
 
     public static final String ALBUM_KEY = "ALBUM_KEY";
 
-    private SwipeRefreshLayout mSwipeRefreshLayout;
-    private RecyclerView mRecycler;
-    private View mErrorView;
-    private EditText mEditText;
-    private Button mEnterButton;
-    private TextView mErrorViewText;
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private RecyclerView recycler;
+    private View errorView;
+    private EditText editText;
+    private Button enterButton;
+    private TextView errorViewText;
 
     private Album mAlbum;
     private String currentUser;
@@ -75,21 +75,21 @@ public class CommentsFragment extends Fragment implements SwipeRefreshLayout.OnR
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        mRecycler = view.findViewById(R.id.recycler_messages);
-        mEnterButton = view.findViewById(R.id.btn_chatbox_send);
-        mEditText = view.findViewById(R.id.ed_chatbox);
+        recycler = view.findViewById(R.id.recycler_messages);
+        enterButton = view.findViewById(R.id.btn_chatbox_send);
+        editText = view.findViewById(R.id.ed_chatbox);
 
-        mSwipeRefreshLayout = view.findViewById(R.id.refresher_messages);
-        mSwipeRefreshLayout.setOnRefreshListener(this);
+        swipeRefreshLayout = view.findViewById(R.id.refresher_messages);
+        swipeRefreshLayout.setOnRefreshListener(this);
 
-        mErrorView = view.findViewById(R.id.error_view);
-        mErrorViewText = mErrorView.findViewById(R.id.tv_error_text);
+        errorView = view.findViewById(R.id.error_view);
+        errorViewText = errorView.findViewById(R.id.tv_error_text);
 
-        mEnterButton.setOnClickListener(buttonView -> sendCommentsWithCheck());
+        enterButton.setOnClickListener(buttonView -> sendCommentsWithCheck());
 
-        mEditText.setOnEditorActionListener((textView, actionId, keyEvent) -> {
+        editText.setOnEditorActionListener((textView, actionId, keyEvent) -> {
             if (keyEvent != null && keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
-                mEditText.clearFocus();
+                editText.clearFocus();
                 sendCommentsWithCheck();
                 return true;
             }
@@ -110,10 +110,10 @@ public class CommentsFragment extends Fragment implements SwipeRefreshLayout.OnR
         }
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        mRecycler.setLayoutManager(layoutManager);
+        recycler.setLayoutManager(layoutManager);
 
         mCommentsAdapter = new CommentsAdapter(currentUser);
-        mRecycler.setAdapter(mCommentsAdapter);
+        recycler.setAdapter(mCommentsAdapter);
 
         musicDao = DbUtils.getDatabase().getMusicDao();
 
@@ -122,7 +122,7 @@ public class CommentsFragment extends Fragment implements SwipeRefreshLayout.OnR
 
     @Override
     public void onRefresh() {
-        mSwipeRefreshLayout.post(() -> getComments(mAlbum.getId()));
+        swipeRefreshLayout.post(() -> getComments(mAlbum.getId()));
     }
 
     @SuppressLint("CheckResult")
@@ -151,19 +151,19 @@ public class CommentsFragment extends Fragment implements SwipeRefreshLayout.OnR
                     return comments;
                 })
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe(disposable -> mSwipeRefreshLayout.setRefreshing(true))
+                .doOnSubscribe(disposable -> swipeRefreshLayout.setRefreshing(true))
                 .doFinally(() -> {
-                    mSwipeRefreshLayout.setRefreshing(false);
+                    swipeRefreshLayout.setRefreshing(false);
                     isFirstRun = false;
                 })
                 .subscribe(comments -> {
                             if (comments.size() == 0) {
-                                mRecycler.setVisibility(View.GONE);
-                                mErrorViewText.setText(R.string.comments_no_comments);
-                                mErrorView.setVisibility(View.VISIBLE);
+                                recycler.setVisibility(View.GONE);
+                                errorViewText.setText(R.string.comments_no_comments);
+                                errorView.setVisibility(View.VISIBLE);
                             } else {
-                                mRecycler.setVisibility(View.VISIBLE);
-                                mErrorView.setVisibility(View.GONE);
+                                recycler.setVisibility(View.VISIBLE);
+                                errorView.setVisibility(View.GONE);
 
                                 if (comments.size() == mCommentsAdapter.getItemCount()) {
                                     if (!isFirstRun) showMessage(R.string.comments_no_new);
@@ -176,9 +176,9 @@ public class CommentsFragment extends Fragment implements SwipeRefreshLayout.OnR
                             }
                         }
                         , throwable -> {
-                            mRecycler.setVisibility(View.GONE);
-                            mErrorViewText.setText(R.string.comments_error);
-                            mErrorView.setVisibility(View.VISIBLE);
+                            recycler.setVisibility(View.GONE);
+                            errorViewText.setText(R.string.comments_error);
+                            errorView.setVisibility(View.VISIBLE);
                         });
 
     }
@@ -214,7 +214,7 @@ public class CommentsFragment extends Fragment implements SwipeRefreshLayout.OnR
 
     private void sendCommentsWithCheck() {
 
-        String messageText = mEditText.getText().toString();
+        String messageText = editText.getText().toString();
 
         if (messageText.isEmpty()) {
             showMessage(R.string.comments_empty_text_to_send);
