@@ -16,6 +16,9 @@ import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
+
+// API from https://android.academy.e-legion.com/docs/
+// available on 26.08.2020
 public interface AcademyApi {
 
     @POST("registration")

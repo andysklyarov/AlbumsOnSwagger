@@ -19,6 +19,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.sklyarov.albumsonswagger.ApiUtilities;
 import com.sklyarov.albumsonswagger.AuthFragment;
+import com.sklyarov.albumsonswagger.CardDecoration;
 import com.sklyarov.albumsonswagger.R;
 import com.sklyarov.albumsonswagger.comments.CommentsFragment;
 import com.sklyarov.albumsonswagger.db.DbUtils;
@@ -37,11 +38,11 @@ public class DetailAlbumFragment extends Fragment implements SwipeRefreshLayout.
 
     public static final String ALBUM_KEY = "ALBUM_KEY";
 
-    private RecyclerView mRecycler;
-    private SwipeRefreshLayout mSwipeRefreshLayout;
-    private View mErrorView;
-    private TextView mErrorViewText;
-    private Album mAlbum;
+    private RecyclerView recycler;
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private View errorView;
+    private TextView errorViewText;
+    private Album album;
     private String currentUser;
     private MusicDao musicDao;
 
@@ -76,7 +77,7 @@ public class DetailAlbumFragment extends Fragment implements SwipeRefreshLayout.
         if (id == R.id.action_text) {
 
             getFragmentManager().beginTransaction()
-                    .replace(R.id.fragmentContainer, CommentsFragment.newInstance(mAlbum, currentUser))
+                    .replace(R.id.fragmentContainer, CommentsFragment.newInstance(album, currentUser))
                     .addToBackStack(CommentsFragment.class.getSimpleName())
                     .commit();
         }
@@ -91,11 +92,11 @@ public class DetailAlbumFragment extends Fragment implements SwipeRefreshLayout.
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        mRecycler = view.findViewById(R.id.recycler);
-        mSwipeRefreshLayout = view.findViewById(R.id.refresher);
-        mSwipeRefreshLayout.setOnRefreshListener(this);
-        mErrorView = view.findViewById(R.id.error_view);
-        mErrorViewText = mErrorView.findViewById(R.id.tv_error_text);
+        recycler = view.findViewById(R.id.recycler);
+        swipeRefreshLayout = view.findViewById(R.id.refresher);
+        swipeRefreshLayout.setOnRefreshListener(this);
+        errorView = view.findViewById(R.id.error_view);
+        errorViewText = errorView.findViewById(R.id.tv_error_text);
     }
 
     @Override
@@ -104,13 +105,13 @@ public class DetailAlbumFragment extends Fragment implements SwipeRefreshLayout.
 
         Bundle args = getArguments();
         if (args != null) {
-            mAlbum = (Album) args.getSerializable(ALBUM_KEY);
-            getActivity().setTitle(mAlbum.getName());
+            album = (Album) args.getSerializable(ALBUM_KEY);
+            getActivity().setTitle(album.getName());
             currentUser = args.getString(AuthFragment.CURRENT_USER_KEY);
         }
 
-        mRecycler.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mRecycler.setAdapter(mSongAdapter);
+        recycler.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recycler.setAdapter(mSongAdapter);
 
         musicDao = DbUtils.getDatabase().getMusicDao();
 
@@ -119,14 +120,14 @@ public class DetailAlbumFragment extends Fragment implements SwipeRefreshLayout.
 
     @Override
     public void onRefresh() {
-        mSwipeRefreshLayout.post(() -> getAlbum());
+        swipeRefreshLayout.post(() -> getAlbum());
     }
 
     @SuppressLint("CheckResult")
     private void getAlbum() {
 
         ApiUtilities.getApiService()
-                .getAlbum(mAlbum.getId())
+                .getAlbum(album.getId())
                 .subscribeOn(Schedulers.io())
                 .doOnSuccess(album -> {
                     int albumId = album.getId();
@@ -139,36 +140,36 @@ public class DetailAlbumFragment extends Fragment implements SwipeRefreshLayout.
                 })
                 .onErrorReturn(throwable -> {
                     if (ApiUtilities.NETWORK_EXCEPTIONS.contains(throwable.getClass())) {
-                        int albumId = mAlbum.getId();
+                        int albumId = album.getId();
 
                         List<Song> result = musicDao.getSongsFromAlbum(albumId);
 
-                        mAlbum.setSongs(result);
-                        return mAlbum;
+                        album.setSongs(result);
+                        return album;
                     } else {
                         return null;
                     }
                 })
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe(disposable -> mSwipeRefreshLayout.setRefreshing(true))
-                .doFinally(() -> mSwipeRefreshLayout.setRefreshing(false))
+                .doOnSubscribe(disposable -> swipeRefreshLayout.setRefreshing(true))
+                .doFinally(() -> swipeRefreshLayout.setRefreshing(false))
                 .subscribe(album -> {
 
                             if (album.getSongs().size() == 0) {
-                                mRecycler.setVisibility(View.GONE);
-                                mErrorViewText.setText("Песни еще не загружены. Включите интернет и попробуйте снова.");
-                                mErrorView.setVisibility(View.VISIBLE);
+                                recycler.setVisibility(View.GONE);
+                                errorViewText.setText("Песни еще не загружены. Включите интернет и попробуйте снова.");
+                                errorView.setVisibility(View.VISIBLE);
                             }
                             else {
-                                mRecycler.setVisibility(View.VISIBLE);
-                                mErrorView.setVisibility(View.GONE);
+                                recycler.setVisibility(View.VISIBLE);
+                                errorView.setVisibility(View.GONE);
                                 mSongAdapter.addData(album.getSongs(), true);
                             }
                         }
                         , throwable -> {
-                            mRecycler.setVisibility(View.GONE);
-                            mErrorViewText.setText(R.string.error_text);
-                            mErrorView.setVisibility(View.VISIBLE);
+                            recycler.setVisibility(View.GONE);
+                            errorViewText.setText(R.string.error_text);
+                            errorView.setVisibility(View.VISIBLE);
                         });
     }
 

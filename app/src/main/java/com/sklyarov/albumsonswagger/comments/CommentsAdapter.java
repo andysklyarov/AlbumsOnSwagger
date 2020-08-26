@@ -46,10 +46,10 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentHolder> {
 
         if (viewType == VIEW_TYPE_MESSAGE_SENT) {
             view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.item_message_sent, parent, false);
+                    .inflate(R.layout.list_item_message_sent, parent, false);
         } else if (viewType == VIEW_TYPE_MESSAGE_RECEIVED) {
             view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.item_message_received, parent, false);
+                    .inflate(R.layout.list_item_message_received, parent, false);
         }
 
         return new CommentHolder(view);
