@@ -2,29 +2,29 @@
 Образовательный проект программы "Многопоточность и сетевое взаимодействие в Android"
 
 # Технологии 
-Layout
-    SwipeRefreshLayout
-    RecyclerView
-    CardView
-    ConstraintLayout
+Layout:
+- SwipeRefreshLayout
+- RecyclerView
+- CardView
+- ConstraintLayout
 
-Network
-    Retrofit2
-    Okhttp3
-    Gson
+Network:
+- Retrofit2
+- Okhttp3
+- Gson
 
-Multitask
-    RxJava2
+Multitask:
+- RxJava2
     
-Database
-    Room
+Database:
+- Room
 
 ## Экраны приложения
-![Регистрация](/screenshots/reg.jpg =250x)
-![Аутентификация](/screenshots/auth.jpg =250x)
-![Альбомы](/screenshots/albums.jpg =250x)
-![Песни](/screenshots/songs.jpg =250x)
-![Коменты](/screenshots/comments.jpg =250x)
+![Регистрация](/screenshots/reg.jpg =250x250)
+![Аутентификация](/screenshots/auth.jpg =250x250)
+![Альбомы](/screenshots/albums.jpg =250x250)
+![Песни](/screenshots/songs.jpg =250x250)
+![Коменты](/screenshots/comments.jpg =250x250)
 
 ## Требования к проектоному заданию
 1. Сделать переход с детального описания альбома (списка песен этого альбома) к комментированию 
@@ -66,5 +66,7 @@ Database
 9. Сохранить комментарии в базе данных Room и отображать их при отсутствии интернета.
 
 ## API приложения
-Android academy e-Legion api
-https://android.academy.e-legion.com/docs/
+[Android academy e-Legion api](https://android.academy.e-legion.com/docs/)
+
+
+
