@@ -20,11 +20,11 @@ Database
     Room
 
 ## Экраны приложения
-![Регистрация](/screenshots/reg.jpg | width=200)
-![Аутентификация](/screenshots/auth.jpg | width=200)
-![Альбомы](/screenshots/albums.jpg | width=200)
-![Песни](/screenshots/songs.jpg | width=200)
-![Коменты](/screenshots/comments.jpg | width=200)
+![Регистрация](/screenshots/reg.jpg =250x)
+![Аутентификация](/screenshots/auth.jpg =250x)
+![Альбомы](/screenshots/albums.jpg =250x)
+![Песни](/screenshots/songs.jpg =250x)
+![Коменты](/screenshots/comments.jpg =250x)
 
 ## Требования к проектоному заданию
 1. Сделать переход с детального описания альбома (списка песен этого альбома) к комментированию 
