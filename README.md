@@ -1,14 +1,14 @@
 # AlbumsOnSwagger
 Образовательный проект программы "Многопоточность и сетевое взаимодействие в Android"
 
-##Экраны приложения
-![Регистрация](https://drive.google.com/file/d/1-sADXIz6emG39XJubrVMK8Qb8TCrmG9A/view?usp=sharing)
-![Аутентификация](https://drive.google.com/file/d/1tu0IcHZyhbdsbQmHN2qPOVYkLSHkf9IP/view?usp=sharing)
-![Альбомы](https://drive.google.com/file/d/10CWk8v8FBMcLPJTyBIFKH6Pud0eOxMQA/view?usp=sharing)
-![Песни](https://drive.google.com/file/d/1TYOKcMgZfLqaIkrtvpljA7krakJkoesv/view?usp=sharing)
-![Коменты](https://drive.google.com/file/d/1ZZ_GDJvf1vqFx9vTtY59gS3bTAaXVQBx/view?usp=sharing)
+## Экраны приложения
+![Регистрация](/screenshots/reg.jpg)
+![Аутентификация](/screenshots/auth.jpg)
+![Альбомы](/screenshots/albums.jpg)
+![Песни](/screenshots/songs.jpg)
+![Коменты](/screenshots/comments.jpg)
 
-##Требования к проектоному заданию
+## Требования к проектоному заданию
 1. Сделать переход с детального описания альбома (списка песен этого альбома) к комментированию 
 этого альбома. К дизайнерским откровениям мы не стремимся, достаточно добавить пункт меню в тулбар.
 
