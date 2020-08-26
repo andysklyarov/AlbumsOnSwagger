@@ -1,12 +1,30 @@
 # AlbumsOnSwagger
 Образовательный проект программы "Многопоточность и сетевое взаимодействие в Android"
 
+# Технологии 
+Layout
+    SwipeRefreshLayout
+    RecyclerView
+    CardView
+    ConstraintLayout
+
+Network
+    Retrofit2
+    Okhttp3
+    Gson
+
+Multitask
+    RxJava2
+    
+Database
+    Room
+
 ## Экраны приложения
-![Регистрация](/screenshots/reg.jpg)
-![Аутентификация](/screenshots/auth.jpg)
-![Альбомы](/screenshots/albums.jpg)
-![Песни](/screenshots/songs.jpg)
-![Коменты](/screenshots/comments.jpg)
+![Регистрация](/screenshots/reg.jpg | width=200)
+![Аутентификация](/screenshots/auth.jpg | width=200)
+![Альбомы](/screenshots/albums.jpg | width=200)
+![Песни](/screenshots/songs.jpg | width=200)
+![Коменты](/screenshots/comments.jpg | width=200)
 
 ## Требования к проектоному заданию
 1. Сделать переход с детального описания альбома (списка песен этого альбома) к комментированию 
@@ -46,3 +64,7 @@
 8. Сделать все это реактивно.
 
 9. Сохранить комментарии в базе данных Room и отображать их при отсутствии интернета.
+
+## API приложения
+Android academy e-Legion api
+https://android.academy.e-legion.com/docs/
